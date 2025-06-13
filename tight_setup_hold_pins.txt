@@ -27,8 +27,8 @@
 | main_clkout1       | main_clkout1      | u_litedram_core/main_litedramcore_bankmachine5_trascon_count_reg[1]/D        |
 | main_clkout1       | main_clkout1      | u_litedram_core/main_litedramcore_choose_cmd_grant_reg[1]/D                  |
 | main_clkout1       | main_clkout1      | u_litedram_core/main_litedramcore_bankmachine5_level_reg[4]/CE               |
-| main_clkout1       | main_clkout1      | u_litedram_core/main_litedramcore_bankmachine5_level_reg[0]/CE               |
 | main_clkout1       | main_clkout1      | u_litedram_core/main_litedramcore_bankmachine5_level_reg[1]/CE               |
+| main_clkout1       | main_clkout1      | u_litedram_core/main_litedramcore_bankmachine5_level_reg[0]/CE               |
 | main_clkout1       | main_clkout1      | u_litedram_core/main_litedramcore_bankmachine1_trascon_count_reg[2]/D        |
 | main_clkout1       | main_clkout1      | u_litedram_core/main_litedramcore_bankmachine1_trccon_count_reg[3]/D         |
 | main_clkout1       | main_clkout1      | u_litedram_core/main_litedramcore_bankmachine7_trascon_count_reg[1]/D        |

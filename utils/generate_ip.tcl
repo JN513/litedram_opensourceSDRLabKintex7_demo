@@ -11,11 +11,7 @@ create_ip -name clk_wiz -vendor xilinx.com -library ip -version 6.0 -module_name
 # Aplica configurações do clock wizard
 set_property -dict [list \
     CONFIG.PRIM_IN_FREQ {50.0} \
-    CONFIG.CLKOUT1_REQUESTED_OUT_FREQ {800} \
-    CONFIG.CLKOUT2_USED {true} \
-    CONFIG.CLKOUT2_REQUESTED_OUT_FREQ {200} \
-    CONFIG.CLKOUT3_USED {true} \
-    CONFIG.CLKOUT3_REQUESTED_OUT_FREQ {100} \
+    CONFIG.CLKOUT1_REQUESTED_OUT_FREQ {100} \
     CONFIG.USE_PHASE_ALIGNMENT {true} \
     CONFIG.RESET_TYPE {ACTIVE_LOW} \
     CONFIG.USE_RESET {true} \

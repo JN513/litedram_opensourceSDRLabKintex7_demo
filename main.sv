@@ -153,7 +153,7 @@ module top #(
             user_port_wishbone_0_stb <= 0;
             user_port_wishbone_0_adr <= 0;
             user_port_wishbone_0_we  <= 0;
-            user_port_wishbone_8_sel <= 32'hFFFFFFFF;
+            user_port_wishbone_0_sel <= 32'hFFFFFFFF;
         end else begin
             case (test_state)
                 TST_IDLE: begin
@@ -163,7 +163,7 @@ module top #(
                 end 
 
                 TST_WRITE: begin
-                    user_port_wishbone_0_data_w <= TEST_VALUE;
+                    user_port_wishbone_0_dat_w <= TEST_VALUE;
                     user_port_wishbone_0_we  <= 1'b1;
                     user_port_wishbone_0_cyc <= 1'b1;
                     user_port_wishbone_0_stb <= 1'b1;
@@ -210,9 +210,6 @@ module top #(
             endcase
         end
     end
-
-
-
 
     assign wb_ctrl_we  = 1'b0;
     assign wb_ctrl_sel = 4'hF; // Select all bytes

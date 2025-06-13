@@ -71,6 +71,7 @@ module top #(
     logic user_port_wishbone_0_stb;
     logic user_port_wishbone_0_we;
 
+    logic [255:0] read_data;
 
     litedram_core u_litedram_core (
         .clk                        (sys_clk_100mhz),                // 1 bit
@@ -128,9 +129,13 @@ module top #(
 
     test_state_t test_state;
     logic [15:0] delay_counter;
-    logic test_pass, test_fail;
+    logic pass, fail;
 
-    localparam TEST_VALUE = {WORD_SIZE{1'b10100101}}; // Padrão A5 repetido
+    assign led = {pass, 1'b1, 5'h0, fail};
+
+    localparam NUM_BYTES = WORD_SIZE / 8;
+
+    localparam TEST_VALUE = {NUM_BYTES{1'b10100101}}; // Padrão A5 repetido
     localparam logic [127:0] TEST_VALUE1 = {16{8'hA5}};
     localparam logic [127:0] TEST_VALUE2 = {16{8'h5A}};
     localparam logic [127:0] TEST_VALUE3 = {16{8'hFF}};
@@ -144,30 +149,61 @@ module top #(
     always_ff @( posedge user_clk ) begin
         if(user_rst) begin
             test_state <= TST_IDLE;
+            user_port_wishbone_0_cyc <= 0;
+            user_port_wishbone_0_stb <= 0;
+            user_port_wishbone_0_adr <= 0;
+            user_port_wishbone_0_we  <= 0;
+            user_port_wishbone_8_sel <= 32'hFFFFFFFF;
         end else begin
             case (test_state)
                 TST_IDLE: begin
-                    
+                    if(ddr3_init_done && !ddr3_init_error) begin    
+                        test_state <= TST_WRITE;
+                    end
                 end 
 
                 TST_WRITE: begin
-                    
+                    user_port_wishbone_0_data_w <= TEST_VALUE;
+                    user_port_wishbone_0_we  <= 1'b1;
+                    user_port_wishbone_0_cyc <= 1'b1;
+                    user_port_wishbone_0_stb <= 1'b1;
+                    test_state <= TST_WAIT_WRITE;
                 end
 
                 TST_WAIT_WRITE: begin
-                    
+                    if(user_port_wishbone_0_ack) begin
+                        test_state <= TST_READ;
+                        user_port_wishbone_0_we  <= 1'b0;
+                        user_port_wishbone_0_cyc <= 1'b0;
+                        user_port_wishbone_0_stb <= 1'b0;
+                    end
                 end
 
                 TST_READ: begin
-                    
+                    user_port_wishbone_0_we  <= 1'b0;
+                    user_port_wishbone_0_cyc <= 1'b1;
+                    user_port_wishbone_0_stb <= 1'b1;
+                    test_state <= TST_WAIT_READ;
                 end
 
                 TST_WAIT_READ: begin
-                    
+                    if(user_port_wishbone_0_ack) begin
+                        test_state <= TST_CHECK;
+                        user_port_wishbone_0_we  <= 1'b0;
+                        user_port_wishbone_0_cyc <= 1'b0;
+                        user_port_wishbone_0_stb <= 1'b0;
+                        read_data <= user_port_wishbone_0_dat_r;
+                    end
                 end
 
                 TST_CHECK: begin
-                    
+                    if(read_data == TEST_VALUE) begin
+                        pass <= 1'b1;
+                        fail <= 1'b0;
+                    end else begin
+                        pass <= 1'b0;
+                        fail <= 1'b1;
+                    end
                 end
 
                 default: test_state <= TST_IDLE; // Reset to idle state 

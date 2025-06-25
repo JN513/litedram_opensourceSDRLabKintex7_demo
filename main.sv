@@ -13,7 +13,7 @@ module top #(
 
     output logic [7:0]  led,
     input  logic [3:0]  btn,
-    input  logic [33:0]  gpio,
+    input  logic [33:0] gpio,
 
     // DRAM interface
     inout  logic [31:0] ddram_dq,
@@ -109,7 +109,7 @@ module top #(
         .user_port_wishbone_0_stb   (user_port_wishbone_0_stb),      // 1 bit
         .user_port_wishbone_0_we    (user_port_wishbone_0_we),       // 1 bit
         .user_rst                   (user_rst),                      // 1 bit
-        
+        /*
         .wb_ctrl_ack                (wb_ctrl_ack),                   // 1 bit
         .wb_ctrl_adr                (wb_ctrl_adr),                   // 30 bits
         .wb_ctrl_bte                (wb_ctrl_bte),                   // 2 bits
@@ -120,7 +120,8 @@ module top #(
         .wb_ctrl_err                (wb_ctrl_err),                   // 1 bit
         .wb_ctrl_sel                (wb_ctrl_sel),                   // 4 bits
         .wb_ctrl_stb                (wb_ctrl_stb),                   // 1 bit
-        .wb_ctrl_we                 (wb_ctrl_we)                     // 1 bit
+        .wb_ctrl_we                 (wb_ctrl_we)                     // 1 bit*/
+        .uart_rx(0)
     );
 
     typedef enum logic [2:0] {
@@ -180,7 +181,6 @@ module top #(
                 end
 
                 TST_WAIT_WRITE: begin
-                    user_port_wishbone_0_stb   <= 1'b0;
                     if(user_port_wishbone_0_ack) begin
                         test_state <= TST_READ;
                         user_port_wishbone_0_we  <= 1'b0;
@@ -197,7 +197,6 @@ module top #(
                 end
 
                 TST_WAIT_READ: begin
-                    user_port_wishbone_0_stb   <= 1'b0;
                     if(user_port_wishbone_0_ack) begin
                         test_state <= TST_CHECK;
                         user_port_wishbone_0_we  <= 1'b0;
@@ -208,7 +207,7 @@ module top #(
                 end
 
                 TST_CHECK: begin
-                    if(read_data === TEST_VALUE9) begin
+                    if(read_data == TEST_VALUE9) begin
                         pass <= 1'b1;
                         fail <= 1'b0;
                     end else begin
@@ -239,7 +238,7 @@ module top #(
 
     assign wb_ctrl_bte = 2'b00; // Linear burst type
     assign wb_ctrl_cti = 3'b000; // Normal burst
-
+*/
 /*
     assign wb_ctrl_we  = 1'b0;
     assign wb_ctrl_sel = 4'hF; // Select all bytes

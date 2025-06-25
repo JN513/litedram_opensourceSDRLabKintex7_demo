@@ -5,44 +5,46 @@ module top #(
     parameter DRAM_CLK_FREQ = 800_000_000, // 800 MHz
     parameter WORD_SIZE     = 256          // Word size for DRAM controller
 ) (
-    input  logic        sys_clk,
+    input  logic        board_clk,
     input  logic        rst_n,
 
     input  logic        rxd,
     output logic        txd,
 
     output logic [7:0]  led,
+    input  logic [3:0]  btn,
+    input  logic [33:0]  gpio,
 
     // DRAM interface
-    inout  logic [31:0] ddr3_dq,
-    inout  logic [3:0]  ddr3_dqs_n,
-    inout  logic [3:0]  ddr3_dqs_p,
-    output logic [14:0] ddr3_addr,
-    output logic [2:0]  ddr3_ba,
-    output logic        ddr3_ras_n,
-    output logic        ddr3_cas_n,
-    output logic        ddr3_we_n,
-    output logic        ddr3_reset_n,
-    output logic [0:0]  ddr3_ck_p,
-    output logic [0:0]  ddr3_ck_n,
-    output logic [0:0]  ddr3_cke,
-    output logic [0:0]  ddr3_cs_n,
-    output logic [3:0]  ddr3_dm,
-    output logic [0:0]  ddr3_odt
+    inout  logic [31:0] ddram_dq,
+    inout  logic [3:0]  ddram_dqs_n,
+    inout  logic [3:0]  ddram_dqs_p,
+    output logic [14:0] ddram_a,
+    output logic [2:0]  ddram_ba,
+    output logic        ddram_ras_n,
+    output logic        ddram_cas_n,
+    output logic        ddram_we_n,
+    output logic        ddram_reset_n,
+    output logic [0:0]  ddram_clk_p,
+    output logic [0:0]  ddram_clk_n,
+    output logic [0:0]  ddram_cke,
+    output logic [0:0]  ddram_cs_n,
+    output logic [3:0]  ddram_dm,
+    output logic [0:0]  ddram_odt
 );
     // PLL and clock generation
-    logic user_clk, locked, user_sys_clk, dram_pll_locked;
+    logic locked, dram_pll_locked, sys_clk_100mhz, init_done_ctrl;
 
     clk_wiz_0 clk_wiz_0_inst (
         .clk_out1 (sys_clk_100mhz), // 100 MHz system clock
         .resetn   (rst_n),          // Active low reset
         .locked   (locked),         // Locked signal
-        .clk_in1  (sys_clk)         // System clock - 50 MHz
+        .clk_in1  (board_clk)       // System clock - 50 MHz
     );
 
     // Control signals
-    logic ddr3_init_done;
-    logic ddr3_init_error;
+    logic ddram_init_done;
+    logic ddram_init_error;
 
     logic wb_ctrl_ack;
     logic [29:0] wb_ctrl_adr;
@@ -77,20 +79,23 @@ module top #(
         .clk                        (sys_clk_100mhz),                // 1 bit
         .rst                        (~rst_n),                        // 1 bit
         
-        .ddram_a                    (ddr3_addr),                     // 15 bits
-        .ddram_ba                   (ddr3_ba),                       // 3 bits
-        .ddram_cas_n                (ddr3_cas_n),                    // 1 bit
-        .ddram_cke                  (ddr3_cke),                      // 1 bit
-        .ddram_clk_n                (ddr3_clk_n),                    // 1 bit
-        .ddram_clk_p                (ddr3_clk_p),                    // 1 bit
-        .ddram_cs_n                 (ddr3_cs_n),                     // 1 bit
-        .ddram_dm                   (ddr3_dm),                       // 4 bits
-        .ddram_odt                  (ddr3_odt),                      // 1 bit
-        .ddram_ras_n                (ddr3_ras_n),                    // 1 bit
-        .ddram_reset_n              (ddr3_reset_n),                  // 1 bit
-        .ddram_we_n                 (ddr3_we_n),                     // 1 bit
-        .init_done                  (ddr3_init_done),                // 1 bit
-        .init_error                 (ddr3_init_error),               // 1 bit
+        .ddram_dq                   (ddram_dq),                      // 32 bits
+        .ddram_dqs_n                (ddram_dqs_n),                   // 4 bits
+        .ddram_dqs_p                (ddram_dqs_p),                   // 4
+        .ddram_a                    (ddram_a),                       // 15 bits
+        .ddram_ba                   (ddram_ba),                      // 3 bits
+        .ddram_cas_n                (ddram_cas_n),                   // 1 bit
+        .ddram_cke                  (ddram_cke),                     // 1 bit
+        .ddram_clk_n                (ddram_clk_n),                   // 1 bit
+        .ddram_clk_p                (ddram_clk_p),                   // 1 bit
+        .ddram_cs_n                 (ddram_cs_n),                    // 1 bit
+        .ddram_dm                   (ddram_dm),                      // 4 bits
+        .ddram_odt                  (ddram_odt),                     // 1 bit
+        .ddram_ras_n                (ddram_ras_n),                   // 1 bit
+        .ddram_reset_n              (ddram_reset_n),                 // 1 bit
+        .ddram_we_n                 (ddram_we_n),                    // 1 bit
+        .init_done                  (ddram_init_done),               // 1 bit
+        .init_error                 (ddram_init_error),              // 1 bit
         .pll_locked                 (dram_pll_locked),               // 1 bit
         
         .user_clk                   (user_clk),                      // 1 bit
@@ -131,11 +136,12 @@ module top #(
     logic [15:0] delay_counter;
     logic pass, fail;
 
-    assign led = {pass, 1'b1, 5'h0, fail};
+    assign led = {pass, 1'b1, ddram_init_done, 1'b0, ddram_init_error ,2'b00, fail};
+    //assign led = 8'hFF; // For debugging, set all LEDs to ON
 
     localparam NUM_BYTES = WORD_SIZE / 8;
 
-    localparam TEST_VALUE = {NUM_BYTES{1'b10100101}}; // Padrão A5 repetido
+    localparam TEST_VALUE = {NUM_BYTES{8'b10100101}}; // Padrão A5 repetido
     localparam logic [127:0] TEST_VALUE1 = {16{8'hA5}};
     localparam logic [127:0] TEST_VALUE2 = {16{8'h5A}};
     localparam logic [127:0] TEST_VALUE3 = {16{8'hFF}};
@@ -144,10 +150,12 @@ module top #(
     localparam logic [127:0] TEST_VALUE6 = {16{8'h0F}};
     localparam logic [127:0] TEST_VALUE7 = {16{8'hAA}};
     localparam logic [127:0] TEST_VALUE8 = {16{8'h55}};
-    localparam logic [127:0] TEST_VALUE9 = 128'hAABB_CCDD_EEFF_0011_2233_4455_6677_8899;
+    localparam logic [127:0] TEST_VALUE9 = 256'hAABB_CCDD_EEFF_0011_2233_4455_6677_8899_AABB_CCDD_EEFF_0011_2233_4455_6677_8899;
 
     always_ff @( posedge user_clk ) begin
         if(user_rst) begin
+            fail <= 0;
+            pass <= 0;
             test_state <= TST_IDLE;
             user_port_wishbone_0_cyc <= 0;
             user_port_wishbone_0_stb <= 0;
@@ -157,20 +165,22 @@ module top #(
         end else begin
             case (test_state)
                 TST_IDLE: begin
-                    if(ddr3_init_done && !ddr3_init_error) begin    
+                    if(ddram_init_done && !ddram_init_error) begin    
                         test_state <= TST_WRITE;
                     end
                 end 
 
                 TST_WRITE: begin
-                    user_port_wishbone_0_dat_w <= TEST_VALUE;
-                    user_port_wishbone_0_we  <= 1'b1;
-                    user_port_wishbone_0_cyc <= 1'b1;
-                    user_port_wishbone_0_stb <= 1'b1;
-                    test_state <= TST_WAIT_WRITE;
+                    user_port_wishbone_0_sel   <= 32'hFFFFFFFF;
+                    user_port_wishbone_0_dat_w <= TEST_VALUE9;
+                    user_port_wishbone_0_we    <= 1'b1;
+                    user_port_wishbone_0_cyc   <= 1'b1;
+                    user_port_wishbone_0_stb   <= 1'b1;
+                    test_state                 <= TST_WAIT_WRITE;
                 end
 
                 TST_WAIT_WRITE: begin
+                    user_port_wishbone_0_stb   <= 1'b0;
                     if(user_port_wishbone_0_ack) begin
                         test_state <= TST_READ;
                         user_port_wishbone_0_we  <= 1'b0;
@@ -187,6 +197,7 @@ module top #(
                 end
 
                 TST_WAIT_READ: begin
+                    user_port_wishbone_0_stb   <= 1'b0;
                     if(user_port_wishbone_0_ack) begin
                         test_state <= TST_CHECK;
                         user_port_wishbone_0_we  <= 1'b0;
@@ -197,7 +208,7 @@ module top #(
                 end
 
                 TST_CHECK: begin
-                    if(read_data == TEST_VALUE) begin
+                    if(read_data === TEST_VALUE9) begin
                         pass <= 1'b1;
                         fail <= 1'b0;
                     end else begin
@@ -210,7 +221,26 @@ module top #(
             endcase
         end
     end
+/*
+    ddr3_init_fsm u_ddr3_init_fsm (
+        .sys_clk_100mhz       (sys_clk_100mhz),                // 1 bit
+        .rst_n                (rst_n),                         // 1 bit
+        .init_done            (init_done_ctrl),                // 1 bit
+        .wb_ctrl_cyc          (wb_ctrl_cyc),                   // 1 bit
+        .wb_ctrl_stb          (wb_ctrl_stb),                   // 1 bit
+        .wb_ctrl_we           (wb_ctrl_we),                    // 1 bit
+        .wb_ctrl_adr          (wb_ctrl_adr),                   // 30 bits
+        .wb_ctrl_dat_w        (wb_ctrl_dat_w),                 // 32 bits
+        .wb_ctrl_sel          (wb_ctrl_sel),                   // 4 bits
+        .wb_ctrl_dat_r        (wb_ctrl_dat_r),                 // 32 bits
+        .wb_ctrl_ack          (wb_ctrl_ack),                   // 1 bit
+        .wb_ctrl_err          (wb_ctrl_err)                    // 1 bit
+    );
 
+    assign wb_ctrl_bte = 2'b00; // Linear burst type
+    assign wb_ctrl_cti = 3'b000; // Normal burst
+
+/*
     assign wb_ctrl_we  = 1'b0;
     assign wb_ctrl_sel = 4'hF; // Select all bytes
     assign wb_ctrl_bte = 2'b00; // Linear burst type
@@ -218,5 +248,5 @@ module top #(
     assign wb_ctrl_cyc = 1'b0; // Cycle not active
     assign wb_ctrl_stb = 1'b0; // Strobe not active
     assign wb_ctrl_adr = 30'h0; // Address not used in this test
-
+*/
 endmodule

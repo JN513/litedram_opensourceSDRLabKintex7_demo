@@ -70,3 +70,7 @@ ip/mig_7series_0/mig_7series_0/datasheet.txt
 # Simulação
 ip/mig_7series_0/mig_7series_0/example_design/sim/
 fifo%     
+vivado.log
+vivado.jou
+*.init
+tight_setup_hold_pins.txt

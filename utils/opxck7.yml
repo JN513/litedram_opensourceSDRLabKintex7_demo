@@ -1,7 +1,7 @@
 {
     # General ------------------------------------------------------------------
     "speedgrade": -2,         # FPGA speedgrade
-    "cpu":        "None", # CPU type (ex vexriscv, serv, None)
+    "cpu":        "None",     # CPU type (ex vexriscv, serv, None)
     "memtype":    "DDR3",     # DRAM type
     "uart":       "rs232",    # Type of UART interface (rs232, fifo)
 

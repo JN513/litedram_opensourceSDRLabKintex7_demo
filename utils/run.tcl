@@ -8,23 +8,7 @@ read_verilog litedram_core.v
 #read_xdc     constraints/litedram_core.xdc
 read_xdc     constraints/pinout_ddr3.xdc
 
-read_verilog {/eda/litex/pythondata-cpu-serv/pythondata_cpu_serv/verilog/rtl/serv_aligner.v}
-read_verilog {/eda/litex/pythondata-cpu-serv/pythondata_cpu_serv/verilog/rtl/serv_alu.v}
-read_verilog {/eda/litex/pythondata-cpu-serv/pythondata_cpu_serv/verilog/rtl/serv_bufreg.v}
-read_verilog {/eda/litex/pythondata-cpu-serv/pythondata_cpu_serv/verilog/rtl/serv_bufreg2.v}
-read_verilog {/eda/litex/pythondata-cpu-serv/pythondata_cpu_serv/verilog/rtl/serv_compdec.v}
-read_verilog {/eda/litex/pythondata-cpu-serv/pythondata_cpu_serv/verilog/rtl/serv_csr.v}
-read_verilog {/eda/litex/pythondata-cpu-serv/pythondata_cpu_serv/verilog/rtl/serv_ctrl.v}
-read_verilog {/eda/litex/pythondata-cpu-serv/pythondata_cpu_serv/verilog/rtl/serv_decode.v}
-read_verilog {/eda/litex/pythondata-cpu-serv/pythondata_cpu_serv/verilog/rtl/serv_immdec.v}
-read_verilog {/eda/litex/pythondata-cpu-serv/pythondata_cpu_serv/verilog/rtl/serv_mem_if.v}
-read_verilog {/eda/litex/pythondata-cpu-serv/pythondata_cpu_serv/verilog/rtl/serv_rf_if.v}
-read_verilog {/eda/litex/pythondata-cpu-serv/pythondata_cpu_serv/verilog/rtl/serv_rf_ram.v}
-read_verilog {/eda/litex/pythondata-cpu-serv/pythondata_cpu_serv/verilog/rtl/serv_rf_ram_if.v}
-read_verilog {/eda/litex/pythondata-cpu-serv/pythondata_cpu_serv/verilog/rtl/serv_rf_top.v}
-read_verilog {/eda/litex/pythondata-cpu-serv/pythondata_cpu_serv/verilog/rtl/serv_state.v}
-read_verilog {/eda/litex/pythondata-cpu-serv/pythondata_cpu_serv/verilog/rtl/serv_synth_wrapper.v}
-read_verilog {/eda/litex/pythondata-cpu-serv/pythondata_cpu_serv/verilog/rtl/serv_top.v}
+read_verilog {/eda/litex/pythondata-cpu-vexriscv/pythondata_cpu_vexriscv/verilog/VexRiscv.v}
 
 # Adiciona o IP clk_wiz_0
 read_verilog ./ip/clk_wiz_0/clk_wiz_0_clk_wiz.v

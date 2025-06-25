@@ -74,3 +74,4 @@ vivado.log
 vivado.jou
 *.init
 tight_setup_hold_pins.txt
+andbg_hs_err_pid402470.log

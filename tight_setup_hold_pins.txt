@@ -1,5 +1,11 @@
-+====================+===================+===================================+
-| Launch Setup Clock | Launch Hold Clock | Pin                               |
-+====================+===================+===================================+
-| crg_clkout1        | crg_clkout1       | u_litedram_core/sram_reg_0/WEA[1] |
-+--------------------+-------------------+-----------------------------------+
++====================+===================+================================================================================+
+| Launch Setup Clock | Launch Hold Clock | Pin                                                                            |
++====================+===================+================================================================================+
+| crg_clkout1        | crg_clkout1       | u_litedram_core/VexRiscv/IBusCachedPlugin_fetchPc_pcReg_reg[15]/D              |
+| crg_clkout1        | crg_clkout1       | u_litedram_core/VexRiscv/CsrPlugin_pipelineLiberator_pcValids_1_reg/D          |
+| crg_clkout1        | crg_clkout1       | u_litedram_core/VexRiscv/execute_arbitration_isValid_reg/D                     |
+| crg_clkout1        | crg_clkout1       | u_litedram_core/VexRiscv/IBusCachedPlugin_fetchPc_pcReg_reg[18]/D              |
+| crg_clkout1        | crg_clkout1       | u_litedram_core/VexRiscv/CsrPlugin_pipelineLiberator_pcValids_2_reg/D          |
+| crg_clkout1        | crg_clkout1       | u_litedram_core/VexRiscv/IBusCachedPlugin_cache/ways_0_tags_reg/ADDRARDADDR[9] |
+| crg_clkout1        | crg_clkout1       | u_litedram_core/VexRiscv/CsrPlugin_pipelineLiberator_pcValids_0_reg/D          |
++--------------------+-------------------+--------------------------------------------------------------------------------+

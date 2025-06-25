@@ -9,7 +9,7 @@
 // Filename   : litedram_core.v
 // Device     : 
 // LiteX sha1 : 0d1484dd4
-// Date       : 2025-06-25 01:40:29
+// Date       : 2025-06-25 17:06:37
 //------------------------------------------------------------------------------
 
 `timescale 1ns / 1ps
@@ -71,8 +71,8 @@ LiteDRAMCore
 └─── csr (SoCCSRHandler)
 └─── irq (SoCIRQHandler)
 └─── ctrl (SoCController)
-└─── cpu (SERV)
-│    └─── [serv_rf_top]
+└─── cpu (VexRiscv)
+│    └─── [VexRiscv]
 └─── rom (SRAM)
 └─── sram (SRAM)
 └─── timer0 (Timer)
@@ -190,9 +190,6 @@ LiteDRAMCore
 │    └─── bitslip_71* (BitSlip)
 │    └─── tappeddelayline_2* (TappedDelayLine)
 │    └─── tappeddelayline_3* (TappedDelayLine)
-│    └─── [OSERDESE2]
-│    └─── [ISERDESE2]
-│    └─── [ODELAYE2]
 │    └─── [IDELAYE2]
 │    └─── [IOBUF]
 │    └─── [OSERDESE2]
@@ -265,21 +262,7 @@ LiteDRAMCore
 │    └─── [ODELAYE2]
 │    └─── [IDELAYE2]
 │    └─── [IOBUF]
-│    └─── [OSERDESE2]
-│    └─── [ISERDESE2]
-│    └─── [ODELAYE2]
 │    └─── [IDELAYE2]
-│    └─── [IOBUF]
-│    └─── [OSERDESE2]
-│    └─── [ISERDESE2]
-│    └─── [ODELAYE2]
-│    └─── [IDELAYE2]
-│    └─── [IOBUF]
-│    └─── [OSERDESE2]
-│    └─── [ISERDESE2]
-│    └─── [ODELAYE2]
-│    └─── [IDELAYE2]
-│    └─── [IOBUF]
 │    └─── [IOBUF]
 │    └─── [OSERDESE2]
 │    └─── [ISERDESE2]
@@ -334,8 +317,6 @@ LiteDRAMCore
 │    └─── [OSERDESE2]
 │    └─── [ISERDESE2]
 │    └─── [ODELAYE2]
-│    └─── [IDELAYE2]
-│    └─── [IOBUF]
 │    └─── [ODELAYE2]
 │    └─── [OBUFDS]
 │    └─── [OSERDESE2]
@@ -347,11 +328,6 @@ LiteDRAMCore
 │    └─── [OSERDESE2]
 │    └─── [ODELAYE2]
 │    └─── [OSERDESE2]
-│    └─── [OSERDESE2]
-│    └─── [ODELAYE2]
-│    └─── [ODELAYE2]
-│    └─── [OSERDESE2]
-│    └─── [OSERDESE2]
 │    └─── [ODELAYE2]
 │    └─── [OSERDESE2]
 │    └─── [ODELAYE2]
@@ -377,6 +353,11 @@ LiteDRAMCore
 │    └─── [ODELAYE2]
 │    └─── [OSERDESE2]
 │    └─── [ODELAYE2]
+│    └─── [OSERDESE2]
+│    └─── [OSERDESE2]
+│    └─── [ODELAYE2]
+│    └─── [ODELAYE2]
+│    └─── [OSERDESE2]
 │    └─── [OSERDESE2]
 │    └─── [ODELAYE2]
 │    └─── [OSERDESE2]
@@ -413,6 +394,25 @@ LiteDRAMCore
 │    └─── [OSERDESE2]
 │    └─── [ODELAYE2]
 │    └─── [IDELAYE2]
+│    └─── [IOBUF]
+│    └─── [OSERDESE2]
+│    └─── [ISERDESE2]
+│    └─── [ODELAYE2]
+│    └─── [IDELAYE2]
+│    └─── [IOBUF]
+│    └─── [OSERDESE2]
+│    └─── [ISERDESE2]
+│    └─── [ODELAYE2]
+│    └─── [IDELAYE2]
+│    └─── [IOBUF]
+│    └─── [OSERDESE2]
+│    └─── [ISERDESE2]
+│    └─── [ODELAYE2]
+│    └─── [IDELAYE2]
+│    └─── [IOBUF]
+│    └─── [OSERDESE2]
+│    └─── [ISERDESE2]
+│    └─── [ODELAYE2]
 │    └─── [OSERDESE2]
 │    └─── [ODELAYE2]
 │    └─── [ODELAYE2]
@@ -1574,9 +1574,9 @@ wire  [255:0] litedramcore_data_port_dat_r;
 reg   [255:0] litedramcore_data_port_dat_w = 256'd0;
 reg    [31:0] litedramcore_data_port_we = 32'd0;
 wire          litedramcore_dbus_ack;
-wire   [31:0] litedramcore_dbus_adr;
-reg     [1:0] litedramcore_dbus_bte = 2'd0;
-reg     [2:0] litedramcore_dbus_cti = 3'd0;
+wire   [29:0] litedramcore_dbus_adr;
+wire    [1:0] litedramcore_dbus_bte;
+wire    [2:0] litedramcore_dbus_cti;
 wire          litedramcore_dbus_cyc;
 wire   [31:0] litedramcore_dbus_dat_r;
 wire   [31:0] litedramcore_dbus_dat_w;
@@ -1589,38 +1589,16 @@ reg           litedramcore_en_storage = 1'd0;
 reg           litedramcore_enable_re = 1'd0;
 reg           litedramcore_enable_storage = 1'd0;
 wire          litedramcore_ibus_ack;
-wire   [31:0] litedramcore_ibus_adr;
-reg     [1:0] litedramcore_ibus_bte = 2'd0;
-reg     [2:0] litedramcore_ibus_cti = 3'd0;
+wire   [29:0] litedramcore_ibus_adr;
+wire    [1:0] litedramcore_ibus_bte;
+wire    [2:0] litedramcore_ibus_cti;
 wire          litedramcore_ibus_cyc;
 wire   [31:0] litedramcore_ibus_dat_r;
-reg    [31:0] litedramcore_ibus_dat_w = 32'd0;
+wire   [31:0] litedramcore_ibus_dat_w;
 wire          litedramcore_ibus_err;
 wire    [3:0] litedramcore_ibus_sel;
 wire          litedramcore_ibus_stb;
-reg           litedramcore_ibus_we = 1'd0;
-wire          litedramcore_interface0_adapted_interface_ack;
-wire   [29:0] litedramcore_interface0_adapted_interface_adr;
-wire    [1:0] litedramcore_interface0_adapted_interface_bte;
-wire    [2:0] litedramcore_interface0_adapted_interface_cti;
-wire          litedramcore_interface0_adapted_interface_cyc;
-wire   [31:0] litedramcore_interface0_adapted_interface_dat_r;
-wire   [31:0] litedramcore_interface0_adapted_interface_dat_w;
-wire          litedramcore_interface0_adapted_interface_err;
-wire    [3:0] litedramcore_interface0_adapted_interface_sel;
-wire          litedramcore_interface0_adapted_interface_stb;
-wire          litedramcore_interface0_adapted_interface_we;
-wire          litedramcore_interface1_adapted_interface_ack;
-wire   [29:0] litedramcore_interface1_adapted_interface_adr;
-wire    [1:0] litedramcore_interface1_adapted_interface_bte;
-wire    [2:0] litedramcore_interface1_adapted_interface_cti;
-wire          litedramcore_interface1_adapted_interface_cyc;
-wire   [31:0] litedramcore_interface1_adapted_interface_dat_r;
-wire   [31:0] litedramcore_interface1_adapted_interface_dat_w;
-wire          litedramcore_interface1_adapted_interface_err;
-wire    [3:0] litedramcore_interface1_adapted_interface_sel;
-wire          litedramcore_interface1_adapted_interface_stb;
-wire          litedramcore_interface1_adapted_interface_we;
+wire          litedramcore_ibus_we;
 reg           litedramcore_interface_ack = 1'd0;
 wire   [26:0] litedramcore_interface_adr;
 reg           litedramcore_interface_cyc = 1'd0;
@@ -1629,6 +1607,7 @@ wire  [255:0] litedramcore_interface_dat_w;
 wire   [31:0] litedramcore_interface_sel;
 reg           litedramcore_interface_stb = 1'd0;
 reg           litedramcore_interface_we = 1'd0;
+reg    [31:0] litedramcore_interrupt = 32'd0;
 wire          litedramcore_irq;
 reg           litedramcore_is_ongoing = 1'd0;
 wire   [13:0] litedramcore_litedramcore_adr;
@@ -3089,6 +3068,7 @@ reg    [31:0] litedramcore_value = 32'd0;
 reg           litedramcore_value_re = 1'd0;
 reg    [31:0] litedramcore_value_status = 32'd0;
 wire          litedramcore_value_we;
+reg    [31:0] litedramcore_vexriscv = 32'd0;
 reg           litedramcore_wb_sdram_ack = 1'd0;
 wire   [29:0] litedramcore_wb_sdram_adr;
 wire    [1:0] litedramcore_wb_sdram_bte;
@@ -3516,28 +3496,11 @@ always @(*) begin
     end
 end
 assign litedramcore_bus_error = error;
-assign litedramcore_interface0_adapted_interface_dat_w = litedramcore_ibus_dat_w;
-assign litedramcore_ibus_dat_r = litedramcore_interface0_adapted_interface_dat_r;
-assign litedramcore_interface0_adapted_interface_sel = litedramcore_ibus_sel;
-assign litedramcore_interface0_adapted_interface_cyc = litedramcore_ibus_cyc;
-assign litedramcore_interface0_adapted_interface_stb = litedramcore_ibus_stb;
-assign litedramcore_ibus_ack = litedramcore_interface0_adapted_interface_ack;
-assign litedramcore_interface0_adapted_interface_we = litedramcore_ibus_we;
-assign litedramcore_interface0_adapted_interface_cti = litedramcore_ibus_cti;
-assign litedramcore_interface0_adapted_interface_bte = litedramcore_ibus_bte;
-assign litedramcore_ibus_err = litedramcore_interface0_adapted_interface_err;
-assign litedramcore_interface0_adapted_interface_adr = litedramcore_ibus_adr[31:2];
-assign litedramcore_interface1_adapted_interface_dat_w = litedramcore_dbus_dat_w;
-assign litedramcore_dbus_dat_r = litedramcore_interface1_adapted_interface_dat_r;
-assign litedramcore_interface1_adapted_interface_sel = litedramcore_dbus_sel;
-assign litedramcore_interface1_adapted_interface_cyc = litedramcore_dbus_cyc;
-assign litedramcore_interface1_adapted_interface_stb = litedramcore_dbus_stb;
-assign litedramcore_dbus_ack = litedramcore_interface1_adapted_interface_ack;
-assign litedramcore_interface1_adapted_interface_we = litedramcore_dbus_we;
-assign litedramcore_interface1_adapted_interface_cti = litedramcore_dbus_cti;
-assign litedramcore_interface1_adapted_interface_bte = litedramcore_dbus_bte;
-assign litedramcore_dbus_err = litedramcore_interface1_adapted_interface_err;
-assign litedramcore_interface1_adapted_interface_adr = litedramcore_dbus_adr[31:2];
+always @(*) begin
+    litedramcore_interrupt <= 32'd0;
+    litedramcore_interrupt[0] <= litedramcore_irq;
+    litedramcore_interrupt[1] <= uart_irq;
+end
 assign shared_adr = rhs_self0;
 assign shared_dat_w = rhs_self1;
 assign shared_sel = rhs_self2;
@@ -3546,19 +3509,19 @@ assign shared_stb = rhs_self4;
 assign shared_we = rhs_self5;
 assign shared_cti = rhs_self6;
 assign shared_bte = rhs_self7;
-assign litedramcore_interface0_adapted_interface_dat_r = shared_dat_r;
-assign litedramcore_interface1_adapted_interface_dat_r = shared_dat_r;
-assign litedramcore_interface0_adapted_interface_ack = (shared_ack & (grant == 1'd0));
-assign litedramcore_interface1_adapted_interface_ack = (shared_ack & (grant == 1'd1));
-assign litedramcore_interface0_adapted_interface_err = (shared_err & (grant == 1'd0));
-assign litedramcore_interface1_adapted_interface_err = (shared_err & (grant == 1'd1));
-assign request = {litedramcore_interface1_adapted_interface_cyc, litedramcore_interface0_adapted_interface_cyc};
+assign litedramcore_ibus_dat_r = shared_dat_r;
+assign litedramcore_dbus_dat_r = shared_dat_r;
+assign litedramcore_ibus_ack = (shared_ack & (grant == 1'd0));
+assign litedramcore_dbus_ack = (shared_ack & (grant == 1'd1));
+assign litedramcore_ibus_err = (shared_err & (grant == 1'd0));
+assign litedramcore_dbus_err = (shared_err & (grant == 1'd1));
+assign request = {litedramcore_dbus_cyc, litedramcore_ibus_cyc};
 always @(*) begin
     slave_sel <= 4'd0;
     slave_sel[0] <= (shared_adr[29:14] == 1'd0);
-    slave_sel[1] <= (shared_adr[29:11] == 12'd2048);
+    slave_sel[1] <= (shared_adr[29:11] == 16'd32768);
     slave_sel[2] <= (shared_adr[29:22] == 7'd64);
-    slave_sel[3] <= (shared_adr[29:14] == 16'd33280);
+    slave_sel[3] <= (shared_adr[29:14] == 16'd61440);
 end
 assign litedramcore_litedramcore_ram_bus_adr = shared_adr;
 assign litedramcore_litedramcore_ram_bus_dat_w = shared_dat_w;
@@ -3616,9 +3579,6 @@ always @(*) begin
 end
 assign done = (count == 1'd0);
 assign litedramcore_bus_errors_status = litedramcore_bus_errors;
-assign litedramcore_ibus_stb = litedramcore_ibus_cyc;
-assign litedramcore_ibus_sel = 4'd15;
-assign litedramcore_dbus_stb = litedramcore_dbus_cyc;
 assign litedramcore_litedramcore_adr = litedramcore_litedramcore_ram_bus_adr[13:0];
 assign litedramcore_litedramcore_ram_bus_dat_r = litedramcore_litedramcore_dat_r;
 always @(*) begin
@@ -3657,20 +3617,6 @@ always @(*) begin
             if (tx_sink_valid) begin
                 rs232phytx_next_state <= 1'd1;
             end
-        end
-    endcase
-end
-always @(*) begin
-    tx_sink_ready <= 1'd0;
-    case (rs232phytx_state)
-        1'd1: begin
-            if (tx_tick) begin
-                if ((tx_count == 4'd9)) begin
-                    tx_sink_ready <= 1'd1;
-                end
-            end
-        end
-        default: begin
         end
     endcase
 end
@@ -3773,6 +3719,20 @@ always @(*) begin
     endcase
 end
 always @(*) begin
+    tx_sink_ready <= 1'd0;
+    case (rs232phytx_state)
+        1'd1: begin
+            if (tx_tick) begin
+                if ((tx_count == 4'd9)) begin
+                    tx_sink_ready <= 1'd1;
+                end
+            end
+        end
+        default: begin
+        end
+    endcase
+end
+always @(*) begin
     rs232phyrx_next_state <= 1'd0;
     rs232phyrx_next_state <= rs232phyrx_state;
     case (rs232phyrx_state)
@@ -3787,20 +3747,6 @@ always @(*) begin
             if (((rx_rx == 1'd0) & (rx_rx_d == 1'd1))) begin
                 rs232phyrx_next_state <= 1'd1;
             end
-        end
-    endcase
-end
-always @(*) begin
-    rx_source_valid <= 1'd0;
-    case (rs232phyrx_state)
-        1'd1: begin
-            if (rx_tick) begin
-                if ((rx_count == 4'd9)) begin
-                    rx_source_valid <= (rx_rx == 1'd1);
-                end
-            end
-        end
-        default: begin
         end
     endcase
 end
@@ -3845,6 +3791,16 @@ always @(*) begin
     endcase
 end
 always @(*) begin
+    rx_enable <= 1'd0;
+    case (rs232phyrx_state)
+        1'd1: begin
+            rx_enable <= 1'd1;
+        end
+        default: begin
+        end
+    endcase
+end
+always @(*) begin
     rx_data_rs232phyrx_next_value1 <= 8'd0;
     case (rs232phyrx_state)
         1'd1: begin
@@ -3857,21 +3813,25 @@ always @(*) begin
     endcase
 end
 always @(*) begin
-    rx_enable <= 1'd0;
+    rx_data_rs232phyrx_next_value_ce1 <= 1'd0;
     case (rs232phyrx_state)
         1'd1: begin
-            rx_enable <= 1'd1;
+            if (rx_tick) begin
+                rx_data_rs232phyrx_next_value_ce1 <= 1'd1;
+            end
         end
         default: begin
         end
     endcase
 end
 always @(*) begin
-    rx_data_rs232phyrx_next_value_ce1 <= 1'd0;
+    rx_source_valid <= 1'd0;
     case (rs232phyrx_state)
         1'd1: begin
             if (rx_tick) begin
-                rx_data_rs232phyrx_next_value_ce1 <= 1'd1;
+                if ((rx_count == 4'd9)) begin
+                    rx_source_valid <= (rx_rx == 1'd1);
+                end
             end
         end
         default: begin
@@ -6517,46 +6477,6 @@ assign litedramcore_sdram_slave_p3_rddata_en = litedramcore_sdram_dfi_p3_rddata_
 assign litedramcore_sdram_dfi_p3_rddata = litedramcore_sdram_slave_p3_rddata;
 assign litedramcore_sdram_dfi_p3_rddata_valid = litedramcore_sdram_slave_p3_rddata_valid;
 always @(*) begin
-    litedramcore_sdram_ext_dfi_p3_rddata <= 64'd0;
-    if (litedramcore_sdram_sel) begin
-        if (litedramcore_sdram_ext_dfi_sel) begin
-            litedramcore_sdram_ext_dfi_p3_rddata <= litedramcore_sdram_master_p3_rddata;
-        end else begin
-        end
-    end else begin
-    end
-end
-always @(*) begin
-    litedramcore_sdram_ext_dfi_p3_rddata_valid <= 1'd0;
-    if (litedramcore_sdram_sel) begin
-        if (litedramcore_sdram_ext_dfi_sel) begin
-            litedramcore_sdram_ext_dfi_p3_rddata_valid <= litedramcore_sdram_master_p3_rddata_valid;
-        end else begin
-        end
-    end else begin
-    end
-end
-always @(*) begin
-    litedramcore_sdram_slave_p1_rddata <= 64'd0;
-    if (litedramcore_sdram_sel) begin
-        if (litedramcore_sdram_ext_dfi_sel) begin
-        end else begin
-            litedramcore_sdram_slave_p1_rddata <= litedramcore_sdram_master_p1_rddata;
-        end
-    end else begin
-    end
-end
-always @(*) begin
-    litedramcore_sdram_slave_p1_rddata_valid <= 1'd0;
-    if (litedramcore_sdram_sel) begin
-        if (litedramcore_sdram_ext_dfi_sel) begin
-        end else begin
-            litedramcore_sdram_slave_p1_rddata_valid <= litedramcore_sdram_master_p1_rddata_valid;
-        end
-    end else begin
-    end
-end
-always @(*) begin
     litedramcore_sdram_slave_p2_rddata <= 64'd0;
     if (litedramcore_sdram_sel) begin
         if (litedramcore_sdram_ext_dfi_sel) begin
@@ -7416,6 +7336,46 @@ always @(*) begin
     end else begin
     end
 end
+always @(*) begin
+    litedramcore_sdram_ext_dfi_p3_rddata <= 64'd0;
+    if (litedramcore_sdram_sel) begin
+        if (litedramcore_sdram_ext_dfi_sel) begin
+            litedramcore_sdram_ext_dfi_p3_rddata <= litedramcore_sdram_master_p3_rddata;
+        end else begin
+        end
+    end else begin
+    end
+end
+always @(*) begin
+    litedramcore_sdram_ext_dfi_p3_rddata_valid <= 1'd0;
+    if (litedramcore_sdram_sel) begin
+        if (litedramcore_sdram_ext_dfi_sel) begin
+            litedramcore_sdram_ext_dfi_p3_rddata_valid <= litedramcore_sdram_master_p3_rddata_valid;
+        end else begin
+        end
+    end else begin
+    end
+end
+always @(*) begin
+    litedramcore_sdram_slave_p1_rddata <= 64'd0;
+    if (litedramcore_sdram_sel) begin
+        if (litedramcore_sdram_ext_dfi_sel) begin
+        end else begin
+            litedramcore_sdram_slave_p1_rddata <= litedramcore_sdram_master_p1_rddata;
+        end
+    end else begin
+    end
+end
+always @(*) begin
+    litedramcore_sdram_slave_p1_rddata_valid <= 1'd0;
+    if (litedramcore_sdram_sel) begin
+        if (litedramcore_sdram_ext_dfi_sel) begin
+        end else begin
+            litedramcore_sdram_slave_p1_rddata_valid <= litedramcore_sdram_master_p1_rddata_valid;
+        end
+    end else begin
+    end
+end
 assign litedramcore_sdram_csr_dfi_p0_cke = litedramcore_sdram_cke;
 assign litedramcore_sdram_csr_dfi_p1_cke = litedramcore_sdram_cke;
 assign litedramcore_sdram_csr_dfi_p2_cke = litedramcore_sdram_cke;
@@ -7428,22 +7388,6 @@ assign litedramcore_sdram_csr_dfi_p0_reset_n = litedramcore_sdram_reset_n;
 assign litedramcore_sdram_csr_dfi_p1_reset_n = litedramcore_sdram_reset_n;
 assign litedramcore_sdram_csr_dfi_p2_reset_n = litedramcore_sdram_reset_n;
 assign litedramcore_sdram_csr_dfi_p3_reset_n = litedramcore_sdram_reset_n;
-always @(*) begin
-    litedramcore_sdram_csr_dfi_p0_ras_n <= 1'd1;
-    if (litedramcore_sdram_phaseinjector0_command_issue_re) begin
-        litedramcore_sdram_csr_dfi_p0_ras_n <= (~litedramcore_sdram_phaseinjector0_csrfield_ras);
-    end else begin
-        litedramcore_sdram_csr_dfi_p0_ras_n <= 1'd1;
-    end
-end
-always @(*) begin
-    litedramcore_sdram_csr_dfi_p0_we_n <= 1'd1;
-    if (litedramcore_sdram_phaseinjector0_command_issue_re) begin
-        litedramcore_sdram_csr_dfi_p0_we_n <= (~litedramcore_sdram_phaseinjector0_csrfield_we);
-    end else begin
-        litedramcore_sdram_csr_dfi_p0_we_n <= 1'd1;
-    end
-end
 always @(*) begin
     litedramcore_sdram_csr_dfi_p0_cas_n <= 1'd1;
     if (litedramcore_sdram_phaseinjector0_command_issue_re) begin
@@ -7468,28 +7412,28 @@ always @(*) begin
         litedramcore_sdram_csr_dfi_p0_cs_n <= {1{1'd1}};
     end
 end
+always @(*) begin
+    litedramcore_sdram_csr_dfi_p0_ras_n <= 1'd1;
+    if (litedramcore_sdram_phaseinjector0_command_issue_re) begin
+        litedramcore_sdram_csr_dfi_p0_ras_n <= (~litedramcore_sdram_phaseinjector0_csrfield_ras);
+    end else begin
+        litedramcore_sdram_csr_dfi_p0_ras_n <= 1'd1;
+    end
+end
+always @(*) begin
+    litedramcore_sdram_csr_dfi_p0_we_n <= 1'd1;
+    if (litedramcore_sdram_phaseinjector0_command_issue_re) begin
+        litedramcore_sdram_csr_dfi_p0_we_n <= (~litedramcore_sdram_phaseinjector0_csrfield_we);
+    end else begin
+        litedramcore_sdram_csr_dfi_p0_we_n <= 1'd1;
+    end
+end
 assign litedramcore_sdram_csr_dfi_p0_address = litedramcore_sdram_phaseinjector0_address_storage;
 assign litedramcore_sdram_csr_dfi_p0_bank = litedramcore_sdram_phaseinjector0_baddress_storage;
 assign litedramcore_sdram_csr_dfi_p0_wrdata_en = (litedramcore_sdram_phaseinjector0_command_issue_re & litedramcore_sdram_phaseinjector0_csrfield_wren);
 assign litedramcore_sdram_csr_dfi_p0_rddata_en = (litedramcore_sdram_phaseinjector0_command_issue_re & litedramcore_sdram_phaseinjector0_csrfield_rden);
 assign litedramcore_sdram_csr_dfi_p0_wrdata = litedramcore_sdram_phaseinjector0_wrdata_storage;
 assign litedramcore_sdram_csr_dfi_p0_wrdata_mask = 1'd0;
-always @(*) begin
-    litedramcore_sdram_csr_dfi_p1_ras_n <= 1'd1;
-    if (litedramcore_sdram_phaseinjector1_command_issue_re) begin
-        litedramcore_sdram_csr_dfi_p1_ras_n <= (~litedramcore_sdram_phaseinjector1_csrfield_ras);
-    end else begin
-        litedramcore_sdram_csr_dfi_p1_ras_n <= 1'd1;
-    end
-end
-always @(*) begin
-    litedramcore_sdram_csr_dfi_p1_we_n <= 1'd1;
-    if (litedramcore_sdram_phaseinjector1_command_issue_re) begin
-        litedramcore_sdram_csr_dfi_p1_we_n <= (~litedramcore_sdram_phaseinjector1_csrfield_we);
-    end else begin
-        litedramcore_sdram_csr_dfi_p1_we_n <= 1'd1;
-    end
-end
 always @(*) begin
     litedramcore_sdram_csr_dfi_p1_cas_n <= 1'd1;
     if (litedramcore_sdram_phaseinjector1_command_issue_re) begin
@@ -7514,28 +7458,28 @@ always @(*) begin
         litedramcore_sdram_csr_dfi_p1_cs_n <= {1{1'd1}};
     end
 end
+always @(*) begin
+    litedramcore_sdram_csr_dfi_p1_ras_n <= 1'd1;
+    if (litedramcore_sdram_phaseinjector1_command_issue_re) begin
+        litedramcore_sdram_csr_dfi_p1_ras_n <= (~litedramcore_sdram_phaseinjector1_csrfield_ras);
+    end else begin
+        litedramcore_sdram_csr_dfi_p1_ras_n <= 1'd1;
+    end
+end
+always @(*) begin
+    litedramcore_sdram_csr_dfi_p1_we_n <= 1'd1;
+    if (litedramcore_sdram_phaseinjector1_command_issue_re) begin
+        litedramcore_sdram_csr_dfi_p1_we_n <= (~litedramcore_sdram_phaseinjector1_csrfield_we);
+    end else begin
+        litedramcore_sdram_csr_dfi_p1_we_n <= 1'd1;
+    end
+end
 assign litedramcore_sdram_csr_dfi_p1_address = litedramcore_sdram_phaseinjector1_address_storage;
 assign litedramcore_sdram_csr_dfi_p1_bank = litedramcore_sdram_phaseinjector1_baddress_storage;
 assign litedramcore_sdram_csr_dfi_p1_wrdata_en = (litedramcore_sdram_phaseinjector1_command_issue_re & litedramcore_sdram_phaseinjector1_csrfield_wren);
 assign litedramcore_sdram_csr_dfi_p1_rddata_en = (litedramcore_sdram_phaseinjector1_command_issue_re & litedramcore_sdram_phaseinjector1_csrfield_rden);
 assign litedramcore_sdram_csr_dfi_p1_wrdata = litedramcore_sdram_phaseinjector1_wrdata_storage;
 assign litedramcore_sdram_csr_dfi_p1_wrdata_mask = 1'd0;
-always @(*) begin
-    litedramcore_sdram_csr_dfi_p2_ras_n <= 1'd1;
-    if (litedramcore_sdram_phaseinjector2_command_issue_re) begin
-        litedramcore_sdram_csr_dfi_p2_ras_n <= (~litedramcore_sdram_phaseinjector2_csrfield_ras);
-    end else begin
-        litedramcore_sdram_csr_dfi_p2_ras_n <= 1'd1;
-    end
-end
-always @(*) begin
-    litedramcore_sdram_csr_dfi_p2_we_n <= 1'd1;
-    if (litedramcore_sdram_phaseinjector2_command_issue_re) begin
-        litedramcore_sdram_csr_dfi_p2_we_n <= (~litedramcore_sdram_phaseinjector2_csrfield_we);
-    end else begin
-        litedramcore_sdram_csr_dfi_p2_we_n <= 1'd1;
-    end
-end
 always @(*) begin
     litedramcore_sdram_csr_dfi_p2_cas_n <= 1'd1;
     if (litedramcore_sdram_phaseinjector2_command_issue_re) begin
@@ -7560,28 +7504,28 @@ always @(*) begin
         litedramcore_sdram_csr_dfi_p2_cs_n <= {1{1'd1}};
     end
 end
+always @(*) begin
+    litedramcore_sdram_csr_dfi_p2_ras_n <= 1'd1;
+    if (litedramcore_sdram_phaseinjector2_command_issue_re) begin
+        litedramcore_sdram_csr_dfi_p2_ras_n <= (~litedramcore_sdram_phaseinjector2_csrfield_ras);
+    end else begin
+        litedramcore_sdram_csr_dfi_p2_ras_n <= 1'd1;
+    end
+end
+always @(*) begin
+    litedramcore_sdram_csr_dfi_p2_we_n <= 1'd1;
+    if (litedramcore_sdram_phaseinjector2_command_issue_re) begin
+        litedramcore_sdram_csr_dfi_p2_we_n <= (~litedramcore_sdram_phaseinjector2_csrfield_we);
+    end else begin
+        litedramcore_sdram_csr_dfi_p2_we_n <= 1'd1;
+    end
+end
 assign litedramcore_sdram_csr_dfi_p2_address = litedramcore_sdram_phaseinjector2_address_storage;
 assign litedramcore_sdram_csr_dfi_p2_bank = litedramcore_sdram_phaseinjector2_baddress_storage;
 assign litedramcore_sdram_csr_dfi_p2_wrdata_en = (litedramcore_sdram_phaseinjector2_command_issue_re & litedramcore_sdram_phaseinjector2_csrfield_wren);
 assign litedramcore_sdram_csr_dfi_p2_rddata_en = (litedramcore_sdram_phaseinjector2_command_issue_re & litedramcore_sdram_phaseinjector2_csrfield_rden);
 assign litedramcore_sdram_csr_dfi_p2_wrdata = litedramcore_sdram_phaseinjector2_wrdata_storage;
 assign litedramcore_sdram_csr_dfi_p2_wrdata_mask = 1'd0;
-always @(*) begin
-    litedramcore_sdram_csr_dfi_p3_ras_n <= 1'd1;
-    if (litedramcore_sdram_phaseinjector3_command_issue_re) begin
-        litedramcore_sdram_csr_dfi_p3_ras_n <= (~litedramcore_sdram_phaseinjector3_csrfield_ras);
-    end else begin
-        litedramcore_sdram_csr_dfi_p3_ras_n <= 1'd1;
-    end
-end
-always @(*) begin
-    litedramcore_sdram_csr_dfi_p3_we_n <= 1'd1;
-    if (litedramcore_sdram_phaseinjector3_command_issue_re) begin
-        litedramcore_sdram_csr_dfi_p3_we_n <= (~litedramcore_sdram_phaseinjector3_csrfield_we);
-    end else begin
-        litedramcore_sdram_csr_dfi_p3_we_n <= 1'd1;
-    end
-end
 always @(*) begin
     litedramcore_sdram_csr_dfi_p3_cas_n <= 1'd1;
     if (litedramcore_sdram_phaseinjector3_command_issue_re) begin
@@ -7604,6 +7548,22 @@ always @(*) begin
         end
     end else begin
         litedramcore_sdram_csr_dfi_p3_cs_n <= {1{1'd1}};
+    end
+end
+always @(*) begin
+    litedramcore_sdram_csr_dfi_p3_ras_n <= 1'd1;
+    if (litedramcore_sdram_phaseinjector3_command_issue_re) begin
+        litedramcore_sdram_csr_dfi_p3_ras_n <= (~litedramcore_sdram_phaseinjector3_csrfield_ras);
+    end else begin
+        litedramcore_sdram_csr_dfi_p3_ras_n <= 1'd1;
+    end
+end
+always @(*) begin
+    litedramcore_sdram_csr_dfi_p3_we_n <= 1'd1;
+    if (litedramcore_sdram_phaseinjector3_command_issue_re) begin
+        litedramcore_sdram_csr_dfi_p3_we_n <= (~litedramcore_sdram_phaseinjector3_csrfield_we);
+    end else begin
+        litedramcore_sdram_csr_dfi_p3_we_n <= 1'd1;
     end
 end
 assign litedramcore_sdram_csr_dfi_p3_address = litedramcore_sdram_phaseinjector3_address_storage;
@@ -7714,47 +7674,6 @@ always @(*) begin
     endcase
 end
 always @(*) begin
-    litedramcore_sdram_zqcs_executer_start <= 1'd0;
-    case (refresher_state)
-        1'd1: begin
-        end
-        2'd2: begin
-            if (litedramcore_sdram_sequencer_done0) begin
-                if (litedramcore_sdram_wants_zqcs) begin
-                    litedramcore_sdram_zqcs_executer_start <= 1'd1;
-                end else begin
-                end
-            end
-        end
-        2'd3: begin
-        end
-        default: begin
-        end
-    endcase
-end
-always @(*) begin
-    litedramcore_sdram_cmd_last <= 1'd0;
-    case (refresher_state)
-        1'd1: begin
-        end
-        2'd2: begin
-            if (litedramcore_sdram_sequencer_done0) begin
-                if (litedramcore_sdram_wants_zqcs) begin
-                end else begin
-                    litedramcore_sdram_cmd_last <= 1'd1;
-                end
-            end
-        end
-        2'd3: begin
-            if (litedramcore_sdram_zqcs_executer_done) begin
-                litedramcore_sdram_cmd_last <= 1'd1;
-            end
-        end
-        default: begin
-        end
-    endcase
-end
-always @(*) begin
     litedramcore_sdram_sequencer_start0 <= 1'd0;
     case (refresher_state)
         1'd1: begin
@@ -7789,6 +7708,47 @@ always @(*) begin
             litedramcore_sdram_cmd_valid <= 1'd1;
             if (litedramcore_sdram_zqcs_executer_done) begin
                 litedramcore_sdram_cmd_valid <= 1'd0;
+            end
+        end
+        default: begin
+        end
+    endcase
+end
+always @(*) begin
+    litedramcore_sdram_zqcs_executer_start <= 1'd0;
+    case (refresher_state)
+        1'd1: begin
+        end
+        2'd2: begin
+            if (litedramcore_sdram_sequencer_done0) begin
+                if (litedramcore_sdram_wants_zqcs) begin
+                    litedramcore_sdram_zqcs_executer_start <= 1'd1;
+                end else begin
+                end
+            end
+        end
+        2'd3: begin
+        end
+        default: begin
+        end
+    endcase
+end
+always @(*) begin
+    litedramcore_sdram_cmd_last <= 1'd0;
+    case (refresher_state)
+        1'd1: begin
+        end
+        2'd2: begin
+            if (litedramcore_sdram_sequencer_done0) begin
+                if (litedramcore_sdram_wants_zqcs) begin
+                end else begin
+                    litedramcore_sdram_cmd_last <= 1'd1;
+                end
+            end
+        end
+        2'd3: begin
+            if (litedramcore_sdram_zqcs_executer_done) begin
+                litedramcore_sdram_cmd_last <= 1'd1;
             end
         end
         default: begin
@@ -7937,141 +7897,6 @@ always @(*) begin
                     end
                 end
             end
-        end
-    endcase
-end
-always @(*) begin
-    litedramcore_sdram_bankmachine0_refresh_gnt <= 1'd0;
-    case (bankmachine0_state)
-        1'd1: begin
-        end
-        2'd2: begin
-        end
-        2'd3: begin
-        end
-        3'd4: begin
-            if (litedramcore_sdram_bankmachine0_twtpcon_ready) begin
-                litedramcore_sdram_bankmachine0_refresh_gnt <= 1'd1;
-            end
-        end
-        3'd5: begin
-        end
-        3'd6: begin
-        end
-        3'd7: begin
-        end
-        4'd8: begin
-        end
-        4'd9: begin
-        end
-        4'd10: begin
-        end
-        default: begin
-        end
-    endcase
-end
-always @(*) begin
-    litedramcore_sdram_bankmachine0_row_open <= 1'd0;
-    case (bankmachine0_state)
-        1'd1: begin
-        end
-        2'd2: begin
-        end
-        2'd3: begin
-            if (litedramcore_sdram_bankmachine0_trccon_ready) begin
-                litedramcore_sdram_bankmachine0_row_open <= 1'd1;
-            end
-        end
-        3'd4: begin
-        end
-        3'd5: begin
-        end
-        3'd6: begin
-        end
-        3'd7: begin
-        end
-        4'd8: begin
-        end
-        4'd9: begin
-        end
-        4'd10: begin
-        end
-        default: begin
-        end
-    endcase
-end
-always @(*) begin
-    litedramcore_sdram_bankmachine0_cmd_valid <= 1'd0;
-    case (bankmachine0_state)
-        1'd1: begin
-            if ((litedramcore_sdram_bankmachine0_twtpcon_ready & litedramcore_sdram_bankmachine0_trascon_ready)) begin
-                litedramcore_sdram_bankmachine0_cmd_valid <= 1'd1;
-            end
-        end
-        2'd2: begin
-        end
-        2'd3: begin
-            if (litedramcore_sdram_bankmachine0_trccon_ready) begin
-                litedramcore_sdram_bankmachine0_cmd_valid <= 1'd1;
-            end
-        end
-        3'd4: begin
-        end
-        3'd5: begin
-        end
-        3'd6: begin
-        end
-        3'd7: begin
-        end
-        4'd8: begin
-        end
-        4'd9: begin
-        end
-        4'd10: begin
-        end
-        default: begin
-            if (litedramcore_sdram_bankmachine0_refresh_req) begin
-            end else begin
-                if (litedramcore_sdram_bankmachine0_source_source_valid) begin
-                    if (litedramcore_sdram_bankmachine0_row_opened) begin
-                        if (litedramcore_sdram_bankmachine0_row_hit) begin
-                            litedramcore_sdram_bankmachine0_cmd_valid <= 1'd1;
-                        end else begin
-                        end
-                    end else begin
-                    end
-                end
-            end
-        end
-    endcase
-end
-always @(*) begin
-    litedramcore_sdram_bankmachine0_row_close <= 1'd0;
-    case (bankmachine0_state)
-        1'd1: begin
-            litedramcore_sdram_bankmachine0_row_close <= 1'd1;
-        end
-        2'd2: begin
-            litedramcore_sdram_bankmachine0_row_close <= 1'd1;
-        end
-        2'd3: begin
-        end
-        3'd4: begin
-            litedramcore_sdram_bankmachine0_row_close <= 1'd1;
-        end
-        3'd5: begin
-        end
-        3'd6: begin
-        end
-        3'd7: begin
-        end
-        4'd8: begin
-        end
-        4'd9: begin
-        end
-        4'd10: begin
-        end
-        default: begin
         end
     endcase
 end
@@ -8424,6 +8249,141 @@ always @(*) begin
         end
     endcase
 end
+always @(*) begin
+    litedramcore_sdram_bankmachine0_refresh_gnt <= 1'd0;
+    case (bankmachine0_state)
+        1'd1: begin
+        end
+        2'd2: begin
+        end
+        2'd3: begin
+        end
+        3'd4: begin
+            if (litedramcore_sdram_bankmachine0_twtpcon_ready) begin
+                litedramcore_sdram_bankmachine0_refresh_gnt <= 1'd1;
+            end
+        end
+        3'd5: begin
+        end
+        3'd6: begin
+        end
+        3'd7: begin
+        end
+        4'd8: begin
+        end
+        4'd9: begin
+        end
+        4'd10: begin
+        end
+        default: begin
+        end
+    endcase
+end
+always @(*) begin
+    litedramcore_sdram_bankmachine0_row_open <= 1'd0;
+    case (bankmachine0_state)
+        1'd1: begin
+        end
+        2'd2: begin
+        end
+        2'd3: begin
+            if (litedramcore_sdram_bankmachine0_trccon_ready) begin
+                litedramcore_sdram_bankmachine0_row_open <= 1'd1;
+            end
+        end
+        3'd4: begin
+        end
+        3'd5: begin
+        end
+        3'd6: begin
+        end
+        3'd7: begin
+        end
+        4'd8: begin
+        end
+        4'd9: begin
+        end
+        4'd10: begin
+        end
+        default: begin
+        end
+    endcase
+end
+always @(*) begin
+    litedramcore_sdram_bankmachine0_cmd_valid <= 1'd0;
+    case (bankmachine0_state)
+        1'd1: begin
+            if ((litedramcore_sdram_bankmachine0_twtpcon_ready & litedramcore_sdram_bankmachine0_trascon_ready)) begin
+                litedramcore_sdram_bankmachine0_cmd_valid <= 1'd1;
+            end
+        end
+        2'd2: begin
+        end
+        2'd3: begin
+            if (litedramcore_sdram_bankmachine0_trccon_ready) begin
+                litedramcore_sdram_bankmachine0_cmd_valid <= 1'd1;
+            end
+        end
+        3'd4: begin
+        end
+        3'd5: begin
+        end
+        3'd6: begin
+        end
+        3'd7: begin
+        end
+        4'd8: begin
+        end
+        4'd9: begin
+        end
+        4'd10: begin
+        end
+        default: begin
+            if (litedramcore_sdram_bankmachine0_refresh_req) begin
+            end else begin
+                if (litedramcore_sdram_bankmachine0_source_source_valid) begin
+                    if (litedramcore_sdram_bankmachine0_row_opened) begin
+                        if (litedramcore_sdram_bankmachine0_row_hit) begin
+                            litedramcore_sdram_bankmachine0_cmd_valid <= 1'd1;
+                        end else begin
+                        end
+                    end else begin
+                    end
+                end
+            end
+        end
+    endcase
+end
+always @(*) begin
+    litedramcore_sdram_bankmachine0_row_close <= 1'd0;
+    case (bankmachine0_state)
+        1'd1: begin
+            litedramcore_sdram_bankmachine0_row_close <= 1'd1;
+        end
+        2'd2: begin
+            litedramcore_sdram_bankmachine0_row_close <= 1'd1;
+        end
+        2'd3: begin
+        end
+        3'd4: begin
+            litedramcore_sdram_bankmachine0_row_close <= 1'd1;
+        end
+        3'd5: begin
+        end
+        3'd6: begin
+        end
+        3'd7: begin
+        end
+        4'd8: begin
+        end
+        4'd9: begin
+        end
+        4'd10: begin
+        end
+        default: begin
+        end
+    endcase
+end
 assign litedramcore_sdram_bankmachine1_sink_valid = litedramcore_sdram_bankmachine1_req_valid;
 assign litedramcore_sdram_bankmachine1_req_ready = litedramcore_sdram_bankmachine1_sink_ready;
 assign litedramcore_sdram_bankmachine1_sink_payload_we = litedramcore_sdram_bankmachine1_req_we;
@@ -8563,75 +8523,6 @@ always @(*) begin
                         end
                     end else begin
                         bankmachine1_next_state <= 2'd3;
-                    end
-                end
-            end
-        end
-    endcase
-end
-always @(*) begin
-    litedramcore_sdram_bankmachine1_row_col_n_addr_sel <= 1'd0;
-    case (bankmachine1_state)
-        1'd1: begin
-        end
-        2'd2: begin
-        end
-        2'd3: begin
-            if (litedramcore_sdram_bankmachine1_trccon_ready) begin
-                litedramcore_sdram_bankmachine1_row_col_n_addr_sel <= 1'd1;
-            end
-        end
-        3'd4: begin
-        end
-        3'd5: begin
-        end
-        3'd6: begin
-        end
-        3'd7: begin
-        end
-        4'd8: begin
-        end
-        4'd9: begin
-        end
-        4'd10: begin
-        end
-        default: begin
-        end
-    endcase
-end
-always @(*) begin
-    litedramcore_sdram_bankmachine1_cmd_payload_cas <= 1'd0;
-    case (bankmachine1_state)
-        1'd1: begin
-        end
-        2'd2: begin
-        end
-        2'd3: begin
-        end
-        3'd4: begin
-        end
-        3'd5: begin
-        end
-        3'd6: begin
-        end
-        3'd7: begin
-        end
-        4'd8: begin
-        end
-        4'd9: begin
-        end
-        4'd10: begin
-        end
-        default: begin
-            if (litedramcore_sdram_bankmachine1_refresh_req) begin
-            end else begin
-                if (litedramcore_sdram_bankmachine1_source_source_valid) begin
-                    if (litedramcore_sdram_bankmachine1_row_opened) begin
-                        if (litedramcore_sdram_bankmachine1_row_hit) begin
-                            litedramcore_sdram_bankmachine1_cmd_payload_cas <= 1'd1;
-                        end else begin
-                        end
-                    end else begin
                     end
                 end
             end
@@ -9053,6 +8944,75 @@ always @(*) begin
         end
     endcase
 end
+always @(*) begin
+    litedramcore_sdram_bankmachine1_row_col_n_addr_sel <= 1'd0;
+    case (bankmachine1_state)
+        1'd1: begin
+        end
+        2'd2: begin
+        end
+        2'd3: begin
+            if (litedramcore_sdram_bankmachine1_trccon_ready) begin
+                litedramcore_sdram_bankmachine1_row_col_n_addr_sel <= 1'd1;
+            end
+        end
+        3'd4: begin
+        end
+        3'd5: begin
+        end
+        3'd6: begin
+        end
+        3'd7: begin
+        end
+        4'd8: begin
+        end
+        4'd9: begin
+        end
+        4'd10: begin
+        end
+        default: begin
+        end
+    endcase
+end
+always @(*) begin
+    litedramcore_sdram_bankmachine1_cmd_payload_cas <= 1'd0;
+    case (bankmachine1_state)
+        1'd1: begin
+        end
+        2'd2: begin
+        end
+        2'd3: begin
+        end
+        3'd4: begin
+        end
+        3'd5: begin
+        end
+        3'd6: begin
+        end
+        3'd7: begin
+        end
+        4'd8: begin
+        end
+        4'd9: begin
+        end
+        4'd10: begin
+        end
+        default: begin
+            if (litedramcore_sdram_bankmachine1_refresh_req) begin
+            end else begin
+                if (litedramcore_sdram_bankmachine1_source_source_valid) begin
+                    if (litedramcore_sdram_bankmachine1_row_opened) begin
+                        if (litedramcore_sdram_bankmachine1_row_hit) begin
+                            litedramcore_sdram_bankmachine1_cmd_payload_cas <= 1'd1;
+                        end else begin
+                        end
+                    end else begin
+                    end
+                end
+            end
+        end
+    endcase
+end
 assign litedramcore_sdram_bankmachine2_sink_valid = litedramcore_sdram_bankmachine2_req_valid;
 assign litedramcore_sdram_bankmachine2_req_ready = litedramcore_sdram_bankmachine2_sink_ready;
 assign litedramcore_sdram_bankmachine2_sink_payload_we = litedramcore_sdram_bankmachine2_req_we;
@@ -9195,6 +9155,297 @@ always @(*) begin
                     end
                 end
             end
+        end
+    endcase
+end
+always @(*) begin
+    litedramcore_sdram_bankmachine2_cmd_payload_is_write <= 1'd0;
+    case (bankmachine2_state)
+        1'd1: begin
+        end
+        2'd2: begin
+        end
+        2'd3: begin
+        end
+        3'd4: begin
+        end
+        3'd5: begin
+        end
+        3'd6: begin
+        end
+        3'd7: begin
+        end
+        4'd8: begin
+        end
+        4'd9: begin
+        end
+        4'd10: begin
+        end
+        default: begin
+            if (litedramcore_sdram_bankmachine2_refresh_req) begin
+            end else begin
+                if (litedramcore_sdram_bankmachine2_source_source_valid) begin
+                    if (litedramcore_sdram_bankmachine2_row_opened) begin
+                        if (litedramcore_sdram_bankmachine2_row_hit) begin
+                            if (litedramcore_sdram_bankmachine2_source_source_payload_we) begin
+                                litedramcore_sdram_bankmachine2_cmd_payload_is_write <= 1'd1;
+                            end else begin
+                            end
+                        end else begin
+                        end
+                    end else begin
+                    end
+                end
+            end
+        end
+    endcase
+end
+always @(*) begin
+    litedramcore_sdram_bankmachine2_req_wdata_ready <= 1'd0;
+    case (bankmachine2_state)
+        1'd1: begin
+        end
+        2'd2: begin
+        end
+        2'd3: begin
+        end
+        3'd4: begin
+        end
+        3'd5: begin
+        end
+        3'd6: begin
+        end
+        3'd7: begin
+        end
+        4'd8: begin
+        end
+        4'd9: begin
+        end
+        4'd10: begin
+        end
+        default: begin
+            if (litedramcore_sdram_bankmachine2_refresh_req) begin
+            end else begin
+                if (litedramcore_sdram_bankmachine2_source_source_valid) begin
+                    if (litedramcore_sdram_bankmachine2_row_opened) begin
+                        if (litedramcore_sdram_bankmachine2_row_hit) begin
+                            if (litedramcore_sdram_bankmachine2_source_source_payload_we) begin
+                                litedramcore_sdram_bankmachine2_req_wdata_ready <= litedramcore_sdram_bankmachine2_cmd_ready;
+                            end else begin
+                            end
+                        end else begin
+                        end
+                    end else begin
+                    end
+                end
+            end
+        end
+    endcase
+end
+always @(*) begin
+    litedramcore_sdram_bankmachine2_req_rdata_valid <= 1'd0;
+    case (bankmachine2_state)
+        1'd1: begin
+        end
+        2'd2: begin
+        end
+        2'd3: begin
+        end
+        3'd4: begin
+        end
+        3'd5: begin
+        end
+        3'd6: begin
+        end
+        3'd7: begin
+        end
+        4'd8: begin
+        end
+        4'd9: begin
+        end
+        4'd10: begin
+        end
+        default: begin
+            if (litedramcore_sdram_bankmachine2_refresh_req) begin
+            end else begin
+                if (litedramcore_sdram_bankmachine2_source_source_valid) begin
+                    if (litedramcore_sdram_bankmachine2_row_opened) begin
+                        if (litedramcore_sdram_bankmachine2_row_hit) begin
+                            if (litedramcore_sdram_bankmachine2_source_source_payload_we) begin
+                            end else begin
+                                litedramcore_sdram_bankmachine2_req_rdata_valid <= litedramcore_sdram_bankmachine2_cmd_ready;
+                            end
+                        end else begin
+                        end
+                    end else begin
+                    end
+                end
+            end
+        end
+    endcase
+end
+always @(*) begin
+    litedramcore_sdram_bankmachine2_refresh_gnt <= 1'd0;
+    case (bankmachine2_state)
+        1'd1: begin
+        end
+        2'd2: begin
+        end
+        2'd3: begin
+        end
+        3'd4: begin
+            if (litedramcore_sdram_bankmachine2_twtpcon_ready) begin
+                litedramcore_sdram_bankmachine2_refresh_gnt <= 1'd1;
+            end
+        end
+        3'd5: begin
+        end
+        3'd6: begin
+        end
+        3'd7: begin
+        end
+        4'd8: begin
+        end
+        4'd9: begin
+        end
+        4'd10: begin
+        end
+        default: begin
+        end
+    endcase
+end
+always @(*) begin
+    litedramcore_sdram_bankmachine2_cmd_valid <= 1'd0;
+    case (bankmachine2_state)
+        1'd1: begin
+            if ((litedramcore_sdram_bankmachine2_twtpcon_ready & litedramcore_sdram_bankmachine2_trascon_ready)) begin
+                litedramcore_sdram_bankmachine2_cmd_valid <= 1'd1;
+            end
+        end
+        2'd2: begin
+        end
+        2'd3: begin
+            if (litedramcore_sdram_bankmachine2_trccon_ready) begin
+                litedramcore_sdram_bankmachine2_cmd_valid <= 1'd1;
+            end
+        end
+        3'd4: begin
+        end
+        3'd5: begin
+        end
+        3'd6: begin
+        end
+        3'd7: begin
+        end
+        4'd8: begin
+        end
+        4'd9: begin
+        end
+        4'd10: begin
+        end
+        default: begin
+            if (litedramcore_sdram_bankmachine2_refresh_req) begin
+            end else begin
+                if (litedramcore_sdram_bankmachine2_source_source_valid) begin
+                    if (litedramcore_sdram_bankmachine2_row_opened) begin
+                        if (litedramcore_sdram_bankmachine2_row_hit) begin
+                            litedramcore_sdram_bankmachine2_cmd_valid <= 1'd1;
+                        end else begin
+                        end
+                    end else begin
+                    end
+                end
+            end
+        end
+    endcase
+end
+always @(*) begin
+    litedramcore_sdram_bankmachine2_row_close <= 1'd0;
+    case (bankmachine2_state)
+        1'd1: begin
+            litedramcore_sdram_bankmachine2_row_close <= 1'd1;
+        end
+        2'd2: begin
+            litedramcore_sdram_bankmachine2_row_close <= 1'd1;
+        end
+        2'd3: begin
+        end
+        3'd4: begin
+            litedramcore_sdram_bankmachine2_row_close <= 1'd1;
+        end
+        3'd5: begin
+        end
+        3'd6: begin
+        end
+        3'd7: begin
+        end
+        4'd8: begin
+        end
+        4'd9: begin
+        end
+        4'd10: begin
+        end
+        default: begin
+        end
+    endcase
+end
+always @(*) begin
+    litedramcore_sdram_bankmachine2_row_open <= 1'd0;
+    case (bankmachine2_state)
+        1'd1: begin
+        end
+        2'd2: begin
+        end
+        2'd3: begin
+            if (litedramcore_sdram_bankmachine2_trccon_ready) begin
+                litedramcore_sdram_bankmachine2_row_open <= 1'd1;
+            end
+        end
+        3'd4: begin
+        end
+        3'd5: begin
+        end
+        3'd6: begin
+        end
+        3'd7: begin
+        end
+        4'd8: begin
+        end
+        4'd9: begin
+        end
+        4'd10: begin
+        end
+        default: begin
+        end
+    endcase
+end
+always @(*) begin
+    litedramcore_sdram_bankmachine2_row_col_n_addr_sel <= 1'd0;
+    case (bankmachine2_state)
+        1'd1: begin
+        end
+        2'd2: begin
+        end
+        2'd3: begin
+            if (litedramcore_sdram_bankmachine2_trccon_ready) begin
+                litedramcore_sdram_bankmachine2_row_col_n_addr_sel <= 1'd1;
+            end
+        end
+        3'd4: begin
+        end
+        3'd5: begin
+        end
+        3'd6: begin
+        end
+        3'd7: begin
+        end
+        4'd8: begin
+        end
+        4'd9: begin
+        end
+        4'd10: begin
+        end
+        default: begin
         end
     endcase
 end
@@ -9391,297 +9642,6 @@ always @(*) begin
         end
     endcase
 end
-always @(*) begin
-    litedramcore_sdram_bankmachine2_cmd_payload_is_write <= 1'd0;
-    case (bankmachine2_state)
-        1'd1: begin
-        end
-        2'd2: begin
-        end
-        2'd3: begin
-        end
-        3'd4: begin
-        end
-        3'd5: begin
-        end
-        3'd6: begin
-        end
-        3'd7: begin
-        end
-        4'd8: begin
-        end
-        4'd9: begin
-        end
-        4'd10: begin
-        end
-        default: begin
-            if (litedramcore_sdram_bankmachine2_refresh_req) begin
-            end else begin
-                if (litedramcore_sdram_bankmachine2_source_source_valid) begin
-                    if (litedramcore_sdram_bankmachine2_row_opened) begin
-                        if (litedramcore_sdram_bankmachine2_row_hit) begin
-                            if (litedramcore_sdram_bankmachine2_source_source_payload_we) begin
-                                litedramcore_sdram_bankmachine2_cmd_payload_is_write <= 1'd1;
-                            end else begin
-                            end
-                        end else begin
-                        end
-                    end else begin
-                    end
-                end
-            end
-        end
-    endcase
-end
-always @(*) begin
-    litedramcore_sdram_bankmachine2_req_wdata_ready <= 1'd0;
-    case (bankmachine2_state)
-        1'd1: begin
-        end
-        2'd2: begin
-        end
-        2'd3: begin
-        end
-        3'd4: begin
-        end
-        3'd5: begin
-        end
-        3'd6: begin
-        end
-        3'd7: begin
-        end
-        4'd8: begin
-        end
-        4'd9: begin
-        end
-        4'd10: begin
-        end
-        default: begin
-            if (litedramcore_sdram_bankmachine2_refresh_req) begin
-            end else begin
-                if (litedramcore_sdram_bankmachine2_source_source_valid) begin
-                    if (litedramcore_sdram_bankmachine2_row_opened) begin
-                        if (litedramcore_sdram_bankmachine2_row_hit) begin
-                            if (litedramcore_sdram_bankmachine2_source_source_payload_we) begin
-                                litedramcore_sdram_bankmachine2_req_wdata_ready <= litedramcore_sdram_bankmachine2_cmd_ready;
-                            end else begin
-                            end
-                        end else begin
-                        end
-                    end else begin
-                    end
-                end
-            end
-        end
-    endcase
-end
-always @(*) begin
-    litedramcore_sdram_bankmachine2_req_rdata_valid <= 1'd0;
-    case (bankmachine2_state)
-        1'd1: begin
-        end
-        2'd2: begin
-        end
-        2'd3: begin
-        end
-        3'd4: begin
-        end
-        3'd5: begin
-        end
-        3'd6: begin
-        end
-        3'd7: begin
-        end
-        4'd8: begin
-        end
-        4'd9: begin
-        end
-        4'd10: begin
-        end
-        default: begin
-            if (litedramcore_sdram_bankmachine2_refresh_req) begin
-            end else begin
-                if (litedramcore_sdram_bankmachine2_source_source_valid) begin
-                    if (litedramcore_sdram_bankmachine2_row_opened) begin
-                        if (litedramcore_sdram_bankmachine2_row_hit) begin
-                            if (litedramcore_sdram_bankmachine2_source_source_payload_we) begin
-                            end else begin
-                                litedramcore_sdram_bankmachine2_req_rdata_valid <= litedramcore_sdram_bankmachine2_cmd_ready;
-                            end
-                        end else begin
-                        end
-                    end else begin
-                    end
-                end
-            end
-        end
-    endcase
-end
-always @(*) begin
-    litedramcore_sdram_bankmachine2_refresh_gnt <= 1'd0;
-    case (bankmachine2_state)
-        1'd1: begin
-        end
-        2'd2: begin
-        end
-        2'd3: begin
-        end
-        3'd4: begin
-            if (litedramcore_sdram_bankmachine2_twtpcon_ready) begin
-                litedramcore_sdram_bankmachine2_refresh_gnt <= 1'd1;
-            end
-        end
-        3'd5: begin
-        end
-        3'd6: begin
-        end
-        3'd7: begin
-        end
-        4'd8: begin
-        end
-        4'd9: begin
-        end
-        4'd10: begin
-        end
-        default: begin
-        end
-    endcase
-end
-always @(*) begin
-    litedramcore_sdram_bankmachine2_row_open <= 1'd0;
-    case (bankmachine2_state)
-        1'd1: begin
-        end
-        2'd2: begin
-        end
-        2'd3: begin
-            if (litedramcore_sdram_bankmachine2_trccon_ready) begin
-                litedramcore_sdram_bankmachine2_row_open <= 1'd1;
-            end
-        end
-        3'd4: begin
-        end
-        3'd5: begin
-        end
-        3'd6: begin
-        end
-        3'd7: begin
-        end
-        4'd8: begin
-        end
-        4'd9: begin
-        end
-        4'd10: begin
-        end
-        default: begin
-        end
-    endcase
-end
-always @(*) begin
-    litedramcore_sdram_bankmachine2_cmd_valid <= 1'd0;
-    case (bankmachine2_state)
-        1'd1: begin
-            if ((litedramcore_sdram_bankmachine2_twtpcon_ready & litedramcore_sdram_bankmachine2_trascon_ready)) begin
-                litedramcore_sdram_bankmachine2_cmd_valid <= 1'd1;
-            end
-        end
-        2'd2: begin
-        end
-        2'd3: begin
-            if (litedramcore_sdram_bankmachine2_trccon_ready) begin
-                litedramcore_sdram_bankmachine2_cmd_valid <= 1'd1;
-            end
-        end
-        3'd4: begin
-        end
-        3'd5: begin
-        end
-        3'd6: begin
-        end
-        3'd7: begin
-        end
-        4'd8: begin
-        end
-        4'd9: begin
-        end
-        4'd10: begin
-        end
-        default: begin
-            if (litedramcore_sdram_bankmachine2_refresh_req) begin
-            end else begin
-                if (litedramcore_sdram_bankmachine2_source_source_valid) begin
-                    if (litedramcore_sdram_bankmachine2_row_opened) begin
-                        if (litedramcore_sdram_bankmachine2_row_hit) begin
-                            litedramcore_sdram_bankmachine2_cmd_valid <= 1'd1;
-                        end else begin
-                        end
-                    end else begin
-                    end
-                end
-            end
-        end
-    endcase
-end
-always @(*) begin
-    litedramcore_sdram_bankmachine2_row_close <= 1'd0;
-    case (bankmachine2_state)
-        1'd1: begin
-            litedramcore_sdram_bankmachine2_row_close <= 1'd1;
-        end
-        2'd2: begin
-            litedramcore_sdram_bankmachine2_row_close <= 1'd1;
-        end
-        2'd3: begin
-        end
-        3'd4: begin
-            litedramcore_sdram_bankmachine2_row_close <= 1'd1;
-        end
-        3'd5: begin
-        end
-        3'd6: begin
-        end
-        3'd7: begin
-        end
-        4'd8: begin
-        end
-        4'd9: begin
-        end
-        4'd10: begin
-        end
-        default: begin
-        end
-    endcase
-end
-always @(*) begin
-    litedramcore_sdram_bankmachine2_row_col_n_addr_sel <= 1'd0;
-    case (bankmachine2_state)
-        1'd1: begin
-        end
-        2'd2: begin
-        end
-        2'd3: begin
-            if (litedramcore_sdram_bankmachine2_trccon_ready) begin
-                litedramcore_sdram_bankmachine2_row_col_n_addr_sel <= 1'd1;
-            end
-        end
-        3'd4: begin
-        end
-        3'd5: begin
-        end
-        3'd6: begin
-        end
-        3'd7: begin
-        end
-        4'd8: begin
-        end
-        4'd9: begin
-        end
-        4'd10: begin
-        end
-        default: begin
-        end
-    endcase
-end
 assign litedramcore_sdram_bankmachine3_sink_valid = litedramcore_sdram_bankmachine3_req_valid;
 assign litedramcore_sdram_bankmachine3_req_ready = litedramcore_sdram_bankmachine3_sink_ready;
 assign litedramcore_sdram_bankmachine3_sink_payload_we = litedramcore_sdram_bankmachine3_req_we;
@@ -9821,174 +9781,6 @@ always @(*) begin
                         end
                     end else begin
                         bankmachine3_next_state <= 2'd3;
-                    end
-                end
-            end
-        end
-    endcase
-end
-always @(*) begin
-    litedramcore_sdram_bankmachine3_cmd_payload_is_read <= 1'd0;
-    case (bankmachine3_state)
-        1'd1: begin
-        end
-        2'd2: begin
-        end
-        2'd3: begin
-        end
-        3'd4: begin
-        end
-        3'd5: begin
-        end
-        3'd6: begin
-        end
-        3'd7: begin
-        end
-        4'd8: begin
-        end
-        4'd9: begin
-        end
-        4'd10: begin
-        end
-        default: begin
-            if (litedramcore_sdram_bankmachine3_refresh_req) begin
-            end else begin
-                if (litedramcore_sdram_bankmachine3_source_source_valid) begin
-                    if (litedramcore_sdram_bankmachine3_row_opened) begin
-                        if (litedramcore_sdram_bankmachine3_row_hit) begin
-                            if (litedramcore_sdram_bankmachine3_source_source_payload_we) begin
-                            end else begin
-                                litedramcore_sdram_bankmachine3_cmd_payload_is_read <= 1'd1;
-                            end
-                        end else begin
-                        end
-                    end else begin
-                    end
-                end
-            end
-        end
-    endcase
-end
-always @(*) begin
-    litedramcore_sdram_bankmachine3_cmd_payload_is_write <= 1'd0;
-    case (bankmachine3_state)
-        1'd1: begin
-        end
-        2'd2: begin
-        end
-        2'd3: begin
-        end
-        3'd4: begin
-        end
-        3'd5: begin
-        end
-        3'd6: begin
-        end
-        3'd7: begin
-        end
-        4'd8: begin
-        end
-        4'd9: begin
-        end
-        4'd10: begin
-        end
-        default: begin
-            if (litedramcore_sdram_bankmachine3_refresh_req) begin
-            end else begin
-                if (litedramcore_sdram_bankmachine3_source_source_valid) begin
-                    if (litedramcore_sdram_bankmachine3_row_opened) begin
-                        if (litedramcore_sdram_bankmachine3_row_hit) begin
-                            if (litedramcore_sdram_bankmachine3_source_source_payload_we) begin
-                                litedramcore_sdram_bankmachine3_cmd_payload_is_write <= 1'd1;
-                            end else begin
-                            end
-                        end else begin
-                        end
-                    end else begin
-                    end
-                end
-            end
-        end
-    endcase
-end
-always @(*) begin
-    litedramcore_sdram_bankmachine3_req_wdata_ready <= 1'd0;
-    case (bankmachine3_state)
-        1'd1: begin
-        end
-        2'd2: begin
-        end
-        2'd3: begin
-        end
-        3'd4: begin
-        end
-        3'd5: begin
-        end
-        3'd6: begin
-        end
-        3'd7: begin
-        end
-        4'd8: begin
-        end
-        4'd9: begin
-        end
-        4'd10: begin
-        end
-        default: begin
-            if (litedramcore_sdram_bankmachine3_refresh_req) begin
-            end else begin
-                if (litedramcore_sdram_bankmachine3_source_source_valid) begin
-                    if (litedramcore_sdram_bankmachine3_row_opened) begin
-                        if (litedramcore_sdram_bankmachine3_row_hit) begin
-                            if (litedramcore_sdram_bankmachine3_source_source_payload_we) begin
-                                litedramcore_sdram_bankmachine3_req_wdata_ready <= litedramcore_sdram_bankmachine3_cmd_ready;
-                            end else begin
-                            end
-                        end else begin
-                        end
-                    end else begin
-                    end
-                end
-            end
-        end
-    endcase
-end
-always @(*) begin
-    litedramcore_sdram_bankmachine3_req_rdata_valid <= 1'd0;
-    case (bankmachine3_state)
-        1'd1: begin
-        end
-        2'd2: begin
-        end
-        2'd3: begin
-        end
-        3'd4: begin
-        end
-        3'd5: begin
-        end
-        3'd6: begin
-        end
-        3'd7: begin
-        end
-        4'd8: begin
-        end
-        4'd9: begin
-        end
-        4'd10: begin
-        end
-        default: begin
-            if (litedramcore_sdram_bankmachine3_refresh_req) begin
-            end else begin
-                if (litedramcore_sdram_bankmachine3_source_source_valid) begin
-                    if (litedramcore_sdram_bankmachine3_row_opened) begin
-                        if (litedramcore_sdram_bankmachine3_row_hit) begin
-                            if (litedramcore_sdram_bankmachine3_source_source_payload_we) begin
-                            end else begin
-                                litedramcore_sdram_bankmachine3_req_rdata_valid <= litedramcore_sdram_bankmachine3_cmd_ready;
-                            end
-                        end else begin
-                        end
-                    end else begin
                     end
                 end
             end
@@ -10311,6 +10103,174 @@ always @(*) begin
         end
     endcase
 end
+always @(*) begin
+    litedramcore_sdram_bankmachine3_cmd_payload_is_read <= 1'd0;
+    case (bankmachine3_state)
+        1'd1: begin
+        end
+        2'd2: begin
+        end
+        2'd3: begin
+        end
+        3'd4: begin
+        end
+        3'd5: begin
+        end
+        3'd6: begin
+        end
+        3'd7: begin
+        end
+        4'd8: begin
+        end
+        4'd9: begin
+        end
+        4'd10: begin
+        end
+        default: begin
+            if (litedramcore_sdram_bankmachine3_refresh_req) begin
+            end else begin
+                if (litedramcore_sdram_bankmachine3_source_source_valid) begin
+                    if (litedramcore_sdram_bankmachine3_row_opened) begin
+                        if (litedramcore_sdram_bankmachine3_row_hit) begin
+                            if (litedramcore_sdram_bankmachine3_source_source_payload_we) begin
+                            end else begin
+                                litedramcore_sdram_bankmachine3_cmd_payload_is_read <= 1'd1;
+                            end
+                        end else begin
+                        end
+                    end else begin
+                    end
+                end
+            end
+        end
+    endcase
+end
+always @(*) begin
+    litedramcore_sdram_bankmachine3_cmd_payload_is_write <= 1'd0;
+    case (bankmachine3_state)
+        1'd1: begin
+        end
+        2'd2: begin
+        end
+        2'd3: begin
+        end
+        3'd4: begin
+        end
+        3'd5: begin
+        end
+        3'd6: begin
+        end
+        3'd7: begin
+        end
+        4'd8: begin
+        end
+        4'd9: begin
+        end
+        4'd10: begin
+        end
+        default: begin
+            if (litedramcore_sdram_bankmachine3_refresh_req) begin
+            end else begin
+                if (litedramcore_sdram_bankmachine3_source_source_valid) begin
+                    if (litedramcore_sdram_bankmachine3_row_opened) begin
+                        if (litedramcore_sdram_bankmachine3_row_hit) begin
+                            if (litedramcore_sdram_bankmachine3_source_source_payload_we) begin
+                                litedramcore_sdram_bankmachine3_cmd_payload_is_write <= 1'd1;
+                            end else begin
+                            end
+                        end else begin
+                        end
+                    end else begin
+                    end
+                end
+            end
+        end
+    endcase
+end
+always @(*) begin
+    litedramcore_sdram_bankmachine3_req_wdata_ready <= 1'd0;
+    case (bankmachine3_state)
+        1'd1: begin
+        end
+        2'd2: begin
+        end
+        2'd3: begin
+        end
+        3'd4: begin
+        end
+        3'd5: begin
+        end
+        3'd6: begin
+        end
+        3'd7: begin
+        end
+        4'd8: begin
+        end
+        4'd9: begin
+        end
+        4'd10: begin
+        end
+        default: begin
+            if (litedramcore_sdram_bankmachine3_refresh_req) begin
+            end else begin
+                if (litedramcore_sdram_bankmachine3_source_source_valid) begin
+                    if (litedramcore_sdram_bankmachine3_row_opened) begin
+                        if (litedramcore_sdram_bankmachine3_row_hit) begin
+                            if (litedramcore_sdram_bankmachine3_source_source_payload_we) begin
+                                litedramcore_sdram_bankmachine3_req_wdata_ready <= litedramcore_sdram_bankmachine3_cmd_ready;
+                            end else begin
+                            end
+                        end else begin
+                        end
+                    end else begin
+                    end
+                end
+            end
+        end
+    endcase
+end
+always @(*) begin
+    litedramcore_sdram_bankmachine3_req_rdata_valid <= 1'd0;
+    case (bankmachine3_state)
+        1'd1: begin
+        end
+        2'd2: begin
+        end
+        2'd3: begin
+        end
+        3'd4: begin
+        end
+        3'd5: begin
+        end
+        3'd6: begin
+        end
+        3'd7: begin
+        end
+        4'd8: begin
+        end
+        4'd9: begin
+        end
+        4'd10: begin
+        end
+        default: begin
+            if (litedramcore_sdram_bankmachine3_refresh_req) begin
+            end else begin
+                if (litedramcore_sdram_bankmachine3_source_source_valid) begin
+                    if (litedramcore_sdram_bankmachine3_row_opened) begin
+                        if (litedramcore_sdram_bankmachine3_row_hit) begin
+                            if (litedramcore_sdram_bankmachine3_source_source_payload_we) begin
+                            end else begin
+                                litedramcore_sdram_bankmachine3_req_rdata_valid <= litedramcore_sdram_bankmachine3_cmd_ready;
+                            end
+                        end else begin
+                        end
+                    end else begin
+                    end
+                end
+            end
+        end
+    endcase
+end
 assign litedramcore_sdram_bankmachine4_sink_valid = litedramcore_sdram_bankmachine4_req_valid;
 assign litedramcore_sdram_bankmachine4_req_ready = litedramcore_sdram_bankmachine4_sink_ready;
 assign litedramcore_sdram_bankmachine4_sink_payload_we = litedramcore_sdram_bankmachine4_req_we;
@@ -10453,141 +10413,6 @@ always @(*) begin
                     end
                 end
             end
-        end
-    endcase
-end
-always @(*) begin
-    litedramcore_sdram_bankmachine4_refresh_gnt <= 1'd0;
-    case (bankmachine4_state)
-        1'd1: begin
-        end
-        2'd2: begin
-        end
-        2'd3: begin
-        end
-        3'd4: begin
-            if (litedramcore_sdram_bankmachine4_twtpcon_ready) begin
-                litedramcore_sdram_bankmachine4_refresh_gnt <= 1'd1;
-            end
-        end
-        3'd5: begin
-        end
-        3'd6: begin
-        end
-        3'd7: begin
-        end
-        4'd8: begin
-        end
-        4'd9: begin
-        end
-        4'd10: begin
-        end
-        default: begin
-        end
-    endcase
-end
-always @(*) begin
-    litedramcore_sdram_bankmachine4_row_open <= 1'd0;
-    case (bankmachine4_state)
-        1'd1: begin
-        end
-        2'd2: begin
-        end
-        2'd3: begin
-            if (litedramcore_sdram_bankmachine4_trccon_ready) begin
-                litedramcore_sdram_bankmachine4_row_open <= 1'd1;
-            end
-        end
-        3'd4: begin
-        end
-        3'd5: begin
-        end
-        3'd6: begin
-        end
-        3'd7: begin
-        end
-        4'd8: begin
-        end
-        4'd9: begin
-        end
-        4'd10: begin
-        end
-        default: begin
-        end
-    endcase
-end
-always @(*) begin
-    litedramcore_sdram_bankmachine4_cmd_valid <= 1'd0;
-    case (bankmachine4_state)
-        1'd1: begin
-            if ((litedramcore_sdram_bankmachine4_twtpcon_ready & litedramcore_sdram_bankmachine4_trascon_ready)) begin
-                litedramcore_sdram_bankmachine4_cmd_valid <= 1'd1;
-            end
-        end
-        2'd2: begin
-        end
-        2'd3: begin
-            if (litedramcore_sdram_bankmachine4_trccon_ready) begin
-                litedramcore_sdram_bankmachine4_cmd_valid <= 1'd1;
-            end
-        end
-        3'd4: begin
-        end
-        3'd5: begin
-        end
-        3'd6: begin
-        end
-        3'd7: begin
-        end
-        4'd8: begin
-        end
-        4'd9: begin
-        end
-        4'd10: begin
-        end
-        default: begin
-            if (litedramcore_sdram_bankmachine4_refresh_req) begin
-            end else begin
-                if (litedramcore_sdram_bankmachine4_source_source_valid) begin
-                    if (litedramcore_sdram_bankmachine4_row_opened) begin
-                        if (litedramcore_sdram_bankmachine4_row_hit) begin
-                            litedramcore_sdram_bankmachine4_cmd_valid <= 1'd1;
-                        end else begin
-                        end
-                    end else begin
-                    end
-                end
-            end
-        end
-    endcase
-end
-always @(*) begin
-    litedramcore_sdram_bankmachine4_row_close <= 1'd0;
-    case (bankmachine4_state)
-        1'd1: begin
-            litedramcore_sdram_bankmachine4_row_close <= 1'd1;
-        end
-        2'd2: begin
-            litedramcore_sdram_bankmachine4_row_close <= 1'd1;
-        end
-        2'd3: begin
-        end
-        3'd4: begin
-            litedramcore_sdram_bankmachine4_row_close <= 1'd1;
-        end
-        3'd5: begin
-        end
-        3'd6: begin
-        end
-        3'd7: begin
-        end
-        4'd8: begin
-        end
-        4'd9: begin
-        end
-        4'd10: begin
-        end
-        default: begin
         end
     endcase
 end
@@ -10940,6 +10765,141 @@ always @(*) begin
         end
     endcase
 end
+always @(*) begin
+    litedramcore_sdram_bankmachine4_refresh_gnt <= 1'd0;
+    case (bankmachine4_state)
+        1'd1: begin
+        end
+        2'd2: begin
+        end
+        2'd3: begin
+        end
+        3'd4: begin
+            if (litedramcore_sdram_bankmachine4_twtpcon_ready) begin
+                litedramcore_sdram_bankmachine4_refresh_gnt <= 1'd1;
+            end
+        end
+        3'd5: begin
+        end
+        3'd6: begin
+        end
+        3'd7: begin
+        end
+        4'd8: begin
+        end
+        4'd9: begin
+        end
+        4'd10: begin
+        end
+        default: begin
+        end
+    endcase
+end
+always @(*) begin
+    litedramcore_sdram_bankmachine4_row_open <= 1'd0;
+    case (bankmachine4_state)
+        1'd1: begin
+        end
+        2'd2: begin
+        end
+        2'd3: begin
+            if (litedramcore_sdram_bankmachine4_trccon_ready) begin
+                litedramcore_sdram_bankmachine4_row_open <= 1'd1;
+            end
+        end
+        3'd4: begin
+        end
+        3'd5: begin
+        end
+        3'd6: begin
+        end
+        3'd7: begin
+        end
+        4'd8: begin
+        end
+        4'd9: begin
+        end
+        4'd10: begin
+        end
+        default: begin
+        end
+    endcase
+end
+always @(*) begin
+    litedramcore_sdram_bankmachine4_cmd_valid <= 1'd0;
+    case (bankmachine4_state)
+        1'd1: begin
+            if ((litedramcore_sdram_bankmachine4_twtpcon_ready & litedramcore_sdram_bankmachine4_trascon_ready)) begin
+                litedramcore_sdram_bankmachine4_cmd_valid <= 1'd1;
+            end
+        end
+        2'd2: begin
+        end
+        2'd3: begin
+            if (litedramcore_sdram_bankmachine4_trccon_ready) begin
+                litedramcore_sdram_bankmachine4_cmd_valid <= 1'd1;
+            end
+        end
+        3'd4: begin
+        end
+        3'd5: begin
+        end
+        3'd6: begin
+        end
+        3'd7: begin
+        end
+        4'd8: begin
+        end
+        4'd9: begin
+        end
+        4'd10: begin
+        end
+        default: begin
+            if (litedramcore_sdram_bankmachine4_refresh_req) begin
+            end else begin
+                if (litedramcore_sdram_bankmachine4_source_source_valid) begin
+                    if (litedramcore_sdram_bankmachine4_row_opened) begin
+                        if (litedramcore_sdram_bankmachine4_row_hit) begin
+                            litedramcore_sdram_bankmachine4_cmd_valid <= 1'd1;
+                        end else begin
+                        end
+                    end else begin
+                    end
+                end
+            end
+        end
+    endcase
+end
+always @(*) begin
+    litedramcore_sdram_bankmachine4_row_close <= 1'd0;
+    case (bankmachine4_state)
+        1'd1: begin
+            litedramcore_sdram_bankmachine4_row_close <= 1'd1;
+        end
+        2'd2: begin
+            litedramcore_sdram_bankmachine4_row_close <= 1'd1;
+        end
+        2'd3: begin
+        end
+        3'd4: begin
+            litedramcore_sdram_bankmachine4_row_close <= 1'd1;
+        end
+        3'd5: begin
+        end
+        3'd6: begin
+        end
+        3'd7: begin
+        end
+        4'd8: begin
+        end
+        4'd9: begin
+        end
+        4'd10: begin
+        end
+        default: begin
+        end
+    endcase
+end
 assign litedramcore_sdram_bankmachine5_sink_valid = litedramcore_sdram_bankmachine5_req_valid;
 assign litedramcore_sdram_bankmachine5_req_ready = litedramcore_sdram_bankmachine5_sink_ready;
 assign litedramcore_sdram_bankmachine5_sink_payload_we = litedramcore_sdram_bankmachine5_req_we;
@@ -11079,105 +11039,6 @@ always @(*) begin
                         end
                     end else begin
                         bankmachine5_next_state <= 2'd3;
-                    end
-                end
-            end
-        end
-    endcase
-end
-always @(*) begin
-    litedramcore_sdram_bankmachine5_row_col_n_addr_sel <= 1'd0;
-    case (bankmachine5_state)
-        1'd1: begin
-        end
-        2'd2: begin
-        end
-        2'd3: begin
-            if (litedramcore_sdram_bankmachine5_trccon_ready) begin
-                litedramcore_sdram_bankmachine5_row_col_n_addr_sel <= 1'd1;
-            end
-        end
-        3'd4: begin
-        end
-        3'd5: begin
-        end
-        3'd6: begin
-        end
-        3'd7: begin
-        end
-        4'd8: begin
-        end
-        4'd9: begin
-        end
-        4'd10: begin
-        end
-        default: begin
-        end
-    endcase
-end
-always @(*) begin
-    litedramcore_sdram_bankmachine5_row_close <= 1'd0;
-    case (bankmachine5_state)
-        1'd1: begin
-            litedramcore_sdram_bankmachine5_row_close <= 1'd1;
-        end
-        2'd2: begin
-            litedramcore_sdram_bankmachine5_row_close <= 1'd1;
-        end
-        2'd3: begin
-        end
-        3'd4: begin
-            litedramcore_sdram_bankmachine5_row_close <= 1'd1;
-        end
-        3'd5: begin
-        end
-        3'd6: begin
-        end
-        3'd7: begin
-        end
-        4'd8: begin
-        end
-        4'd9: begin
-        end
-        4'd10: begin
-        end
-        default: begin
-        end
-    endcase
-end
-always @(*) begin
-    litedramcore_sdram_bankmachine5_cmd_payload_cas <= 1'd0;
-    case (bankmachine5_state)
-        1'd1: begin
-        end
-        2'd2: begin
-        end
-        2'd3: begin
-        end
-        3'd4: begin
-        end
-        3'd5: begin
-        end
-        3'd6: begin
-        end
-        3'd7: begin
-        end
-        4'd8: begin
-        end
-        4'd9: begin
-        end
-        4'd10: begin
-        end
-        default: begin
-            if (litedramcore_sdram_bankmachine5_refresh_req) begin
-            end else begin
-                if (litedramcore_sdram_bankmachine5_source_source_valid) begin
-                    if (litedramcore_sdram_bankmachine5_row_opened) begin
-                        if (litedramcore_sdram_bankmachine5_row_hit) begin
-                            litedramcore_sdram_bankmachine5_cmd_payload_cas <= 1'd1;
-                        end else begin
-                        end
-                    end else begin
                     end
                 end
             end
@@ -11569,6 +11430,105 @@ always @(*) begin
         end
     endcase
 end
+always @(*) begin
+    litedramcore_sdram_bankmachine5_row_close <= 1'd0;
+    case (bankmachine5_state)
+        1'd1: begin
+            litedramcore_sdram_bankmachine5_row_close <= 1'd1;
+        end
+        2'd2: begin
+            litedramcore_sdram_bankmachine5_row_close <= 1'd1;
+        end
+        2'd3: begin
+        end
+        3'd4: begin
+            litedramcore_sdram_bankmachine5_row_close <= 1'd1;
+        end
+        3'd5: begin
+        end
+        3'd6: begin
+        end
+        3'd7: begin
+        end
+        4'd8: begin
+        end
+        4'd9: begin
+        end
+        4'd10: begin
+        end
+        default: begin
+        end
+    endcase
+end
+always @(*) begin
+    litedramcore_sdram_bankmachine5_row_col_n_addr_sel <= 1'd0;
+    case (bankmachine5_state)
+        1'd1: begin
+        end
+        2'd2: begin
+        end
+        2'd3: begin
+            if (litedramcore_sdram_bankmachine5_trccon_ready) begin
+                litedramcore_sdram_bankmachine5_row_col_n_addr_sel <= 1'd1;
+            end
+        end
+        3'd4: begin
+        end
+        3'd5: begin
+        end
+        3'd6: begin
+        end
+        3'd7: begin
+        end
+        4'd8: begin
+        end
+        4'd9: begin
+        end
+        4'd10: begin
+        end
+        default: begin
+        end
+    endcase
+end
+always @(*) begin
+    litedramcore_sdram_bankmachine5_cmd_payload_cas <= 1'd0;
+    case (bankmachine5_state)
+        1'd1: begin
+        end
+        2'd2: begin
+        end
+        2'd3: begin
+        end
+        3'd4: begin
+        end
+        3'd5: begin
+        end
+        3'd6: begin
+        end
+        3'd7: begin
+        end
+        4'd8: begin
+        end
+        4'd9: begin
+        end
+        4'd10: begin
+        end
+        default: begin
+            if (litedramcore_sdram_bankmachine5_refresh_req) begin
+            end else begin
+                if (litedramcore_sdram_bankmachine5_source_source_valid) begin
+                    if (litedramcore_sdram_bankmachine5_row_opened) begin
+                        if (litedramcore_sdram_bankmachine5_row_hit) begin
+                            litedramcore_sdram_bankmachine5_cmd_payload_cas <= 1'd1;
+                        end else begin
+                        end
+                    end else begin
+                    end
+                end
+            end
+        end
+    endcase
+end
 assign litedramcore_sdram_bankmachine6_sink_valid = litedramcore_sdram_bankmachine6_req_valid;
 assign litedramcore_sdram_bankmachine6_req_ready = litedramcore_sdram_bankmachine6_sink_ready;
 assign litedramcore_sdram_bankmachine6_sink_payload_we = litedramcore_sdram_bankmachine6_req_we;
@@ -11708,199 +11668,6 @@ always @(*) begin
                         end
                     end else begin
                         bankmachine6_next_state <= 2'd3;
-                    end
-                end
-            end
-        end
-    endcase
-end
-always @(*) begin
-    litedramcore_sdram_bankmachine6_cmd_payload_cas <= 1'd0;
-    case (bankmachine6_state)
-        1'd1: begin
-        end
-        2'd2: begin
-        end
-        2'd3: begin
-        end
-        3'd4: begin
-        end
-        3'd5: begin
-        end
-        3'd6: begin
-        end
-        3'd7: begin
-        end
-        4'd8: begin
-        end
-        4'd9: begin
-        end
-        4'd10: begin
-        end
-        default: begin
-            if (litedramcore_sdram_bankmachine6_refresh_req) begin
-            end else begin
-                if (litedramcore_sdram_bankmachine6_source_source_valid) begin
-                    if (litedramcore_sdram_bankmachine6_row_opened) begin
-                        if (litedramcore_sdram_bankmachine6_row_hit) begin
-                            litedramcore_sdram_bankmachine6_cmd_payload_cas <= 1'd1;
-                        end else begin
-                        end
-                    end else begin
-                    end
-                end
-            end
-        end
-    endcase
-end
-always @(*) begin
-    litedramcore_sdram_bankmachine6_cmd_payload_ras <= 1'd0;
-    case (bankmachine6_state)
-        1'd1: begin
-            if ((litedramcore_sdram_bankmachine6_twtpcon_ready & litedramcore_sdram_bankmachine6_trascon_ready)) begin
-                litedramcore_sdram_bankmachine6_cmd_payload_ras <= 1'd1;
-            end
-        end
-        2'd2: begin
-        end
-        2'd3: begin
-            if (litedramcore_sdram_bankmachine6_trccon_ready) begin
-                litedramcore_sdram_bankmachine6_cmd_payload_ras <= 1'd1;
-            end
-        end
-        3'd4: begin
-        end
-        3'd5: begin
-        end
-        3'd6: begin
-        end
-        3'd7: begin
-        end
-        4'd8: begin
-        end
-        4'd9: begin
-        end
-        4'd10: begin
-        end
-        default: begin
-        end
-    endcase
-end
-always @(*) begin
-    litedramcore_sdram_bankmachine6_cmd_payload_we <= 1'd0;
-    case (bankmachine6_state)
-        1'd1: begin
-            if ((litedramcore_sdram_bankmachine6_twtpcon_ready & litedramcore_sdram_bankmachine6_trascon_ready)) begin
-                litedramcore_sdram_bankmachine6_cmd_payload_we <= 1'd1;
-            end
-        end
-        2'd2: begin
-        end
-        2'd3: begin
-        end
-        3'd4: begin
-        end
-        3'd5: begin
-        end
-        3'd6: begin
-        end
-        3'd7: begin
-        end
-        4'd8: begin
-        end
-        4'd9: begin
-        end
-        4'd10: begin
-        end
-        default: begin
-            if (litedramcore_sdram_bankmachine6_refresh_req) begin
-            end else begin
-                if (litedramcore_sdram_bankmachine6_source_source_valid) begin
-                    if (litedramcore_sdram_bankmachine6_row_opened) begin
-                        if (litedramcore_sdram_bankmachine6_row_hit) begin
-                            if (litedramcore_sdram_bankmachine6_source_source_payload_we) begin
-                                litedramcore_sdram_bankmachine6_cmd_payload_we <= 1'd1;
-                            end else begin
-                            end
-                        end else begin
-                        end
-                    end else begin
-                    end
-                end
-            end
-        end
-    endcase
-end
-always @(*) begin
-    litedramcore_sdram_bankmachine6_cmd_payload_is_cmd <= 1'd0;
-    case (bankmachine6_state)
-        1'd1: begin
-            if ((litedramcore_sdram_bankmachine6_twtpcon_ready & litedramcore_sdram_bankmachine6_trascon_ready)) begin
-                litedramcore_sdram_bankmachine6_cmd_payload_is_cmd <= 1'd1;
-            end
-        end
-        2'd2: begin
-        end
-        2'd3: begin
-            if (litedramcore_sdram_bankmachine6_trccon_ready) begin
-                litedramcore_sdram_bankmachine6_cmd_payload_is_cmd <= 1'd1;
-            end
-        end
-        3'd4: begin
-            litedramcore_sdram_bankmachine6_cmd_payload_is_cmd <= 1'd1;
-        end
-        3'd5: begin
-        end
-        3'd6: begin
-        end
-        3'd7: begin
-        end
-        4'd8: begin
-        end
-        4'd9: begin
-        end
-        4'd10: begin
-        end
-        default: begin
-        end
-    endcase
-end
-always @(*) begin
-    litedramcore_sdram_bankmachine6_cmd_payload_is_read <= 1'd0;
-    case (bankmachine6_state)
-        1'd1: begin
-        end
-        2'd2: begin
-        end
-        2'd3: begin
-        end
-        3'd4: begin
-        end
-        3'd5: begin
-        end
-        3'd6: begin
-        end
-        3'd7: begin
-        end
-        4'd8: begin
-        end
-        4'd9: begin
-        end
-        4'd10: begin
-        end
-        default: begin
-            if (litedramcore_sdram_bankmachine6_refresh_req) begin
-            end else begin
-                if (litedramcore_sdram_bankmachine6_source_source_valid) begin
-                    if (litedramcore_sdram_bankmachine6_row_opened) begin
-                        if (litedramcore_sdram_bankmachine6_row_hit) begin
-                            if (litedramcore_sdram_bankmachine6_source_source_payload_we) begin
-                            end else begin
-                                litedramcore_sdram_bankmachine6_cmd_payload_is_read <= 1'd1;
-                            end
-                        end else begin
-                        end
-                    end else begin
                     end
                 end
             end
@@ -12198,6 +11965,199 @@ always @(*) begin
         end
     endcase
 end
+always @(*) begin
+    litedramcore_sdram_bankmachine6_cmd_payload_cas <= 1'd0;
+    case (bankmachine6_state)
+        1'd1: begin
+        end
+        2'd2: begin
+        end
+        2'd3: begin
+        end
+        3'd4: begin
+        end
+        3'd5: begin
+        end
+        3'd6: begin
+        end
+        3'd7: begin
+        end
+        4'd8: begin
+        end
+        4'd9: begin
+        end
+        4'd10: begin
+        end
+        default: begin
+            if (litedramcore_sdram_bankmachine6_refresh_req) begin
+            end else begin
+                if (litedramcore_sdram_bankmachine6_source_source_valid) begin
+                    if (litedramcore_sdram_bankmachine6_row_opened) begin
+                        if (litedramcore_sdram_bankmachine6_row_hit) begin
+                            litedramcore_sdram_bankmachine6_cmd_payload_cas <= 1'd1;
+                        end else begin
+                        end
+                    end else begin
+                    end
+                end
+            end
+        end
+    endcase
+end
+always @(*) begin
+    litedramcore_sdram_bankmachine6_cmd_payload_ras <= 1'd0;
+    case (bankmachine6_state)
+        1'd1: begin
+            if ((litedramcore_sdram_bankmachine6_twtpcon_ready & litedramcore_sdram_bankmachine6_trascon_ready)) begin
+                litedramcore_sdram_bankmachine6_cmd_payload_ras <= 1'd1;
+            end
+        end
+        2'd2: begin
+        end
+        2'd3: begin
+            if (litedramcore_sdram_bankmachine6_trccon_ready) begin
+                litedramcore_sdram_bankmachine6_cmd_payload_ras <= 1'd1;
+            end
+        end
+        3'd4: begin
+        end
+        3'd5: begin
+        end
+        3'd6: begin
+        end
+        3'd7: begin
+        end
+        4'd8: begin
+        end
+        4'd9: begin
+        end
+        4'd10: begin
+        end
+        default: begin
+        end
+    endcase
+end
+always @(*) begin
+    litedramcore_sdram_bankmachine6_cmd_payload_we <= 1'd0;
+    case (bankmachine6_state)
+        1'd1: begin
+            if ((litedramcore_sdram_bankmachine6_twtpcon_ready & litedramcore_sdram_bankmachine6_trascon_ready)) begin
+                litedramcore_sdram_bankmachine6_cmd_payload_we <= 1'd1;
+            end
+        end
+        2'd2: begin
+        end
+        2'd3: begin
+        end
+        3'd4: begin
+        end
+        3'd5: begin
+        end
+        3'd6: begin
+        end
+        3'd7: begin
+        end
+        4'd8: begin
+        end
+        4'd9: begin
+        end
+        4'd10: begin
+        end
+        default: begin
+            if (litedramcore_sdram_bankmachine6_refresh_req) begin
+            end else begin
+                if (litedramcore_sdram_bankmachine6_source_source_valid) begin
+                    if (litedramcore_sdram_bankmachine6_row_opened) begin
+                        if (litedramcore_sdram_bankmachine6_row_hit) begin
+                            if (litedramcore_sdram_bankmachine6_source_source_payload_we) begin
+                                litedramcore_sdram_bankmachine6_cmd_payload_we <= 1'd1;
+                            end else begin
+                            end
+                        end else begin
+                        end
+                    end else begin
+                    end
+                end
+            end
+        end
+    endcase
+end
+always @(*) begin
+    litedramcore_sdram_bankmachine6_cmd_payload_is_cmd <= 1'd0;
+    case (bankmachine6_state)
+        1'd1: begin
+            if ((litedramcore_sdram_bankmachine6_twtpcon_ready & litedramcore_sdram_bankmachine6_trascon_ready)) begin
+                litedramcore_sdram_bankmachine6_cmd_payload_is_cmd <= 1'd1;
+            end
+        end
+        2'd2: begin
+        end
+        2'd3: begin
+            if (litedramcore_sdram_bankmachine6_trccon_ready) begin
+                litedramcore_sdram_bankmachine6_cmd_payload_is_cmd <= 1'd1;
+            end
+        end
+        3'd4: begin
+            litedramcore_sdram_bankmachine6_cmd_payload_is_cmd <= 1'd1;
+        end
+        3'd5: begin
+        end
+        3'd6: begin
+        end
+        3'd7: begin
+        end
+        4'd8: begin
+        end
+        4'd9: begin
+        end
+        4'd10: begin
+        end
+        default: begin
+        end
+    endcase
+end
+always @(*) begin
+    litedramcore_sdram_bankmachine6_cmd_payload_is_read <= 1'd0;
+    case (bankmachine6_state)
+        1'd1: begin
+        end
+        2'd2: begin
+        end
+        2'd3: begin
+        end
+        3'd4: begin
+        end
+        3'd5: begin
+        end
+        3'd6: begin
+        end
+        3'd7: begin
+        end
+        4'd8: begin
+        end
+        4'd9: begin
+        end
+        4'd10: begin
+        end
+        default: begin
+            if (litedramcore_sdram_bankmachine6_refresh_req) begin
+            end else begin
+                if (litedramcore_sdram_bankmachine6_source_source_valid) begin
+                    if (litedramcore_sdram_bankmachine6_row_opened) begin
+                        if (litedramcore_sdram_bankmachine6_row_hit) begin
+                            if (litedramcore_sdram_bankmachine6_source_source_payload_we) begin
+                            end else begin
+                                litedramcore_sdram_bankmachine6_cmd_payload_is_read <= 1'd1;
+                            end
+                        end else begin
+                        end
+                    end else begin
+                    end
+                end
+            end
+        end
+    endcase
+end
 assign litedramcore_sdram_bankmachine7_sink_valid = litedramcore_sdram_bankmachine7_req_valid;
 assign litedramcore_sdram_bankmachine7_req_ready = litedramcore_sdram_bankmachine7_sink_ready;
 assign litedramcore_sdram_bankmachine7_sink_payload_we = litedramcore_sdram_bankmachine7_req_we;
@@ -12337,174 +12297,6 @@ always @(*) begin
                         end
                     end else begin
                         bankmachine7_next_state <= 2'd3;
-                    end
-                end
-            end
-        end
-    endcase
-end
-always @(*) begin
-    litedramcore_sdram_bankmachine7_cmd_payload_is_read <= 1'd0;
-    case (bankmachine7_state)
-        1'd1: begin
-        end
-        2'd2: begin
-        end
-        2'd3: begin
-        end
-        3'd4: begin
-        end
-        3'd5: begin
-        end
-        3'd6: begin
-        end
-        3'd7: begin
-        end
-        4'd8: begin
-        end
-        4'd9: begin
-        end
-        4'd10: begin
-        end
-        default: begin
-            if (litedramcore_sdram_bankmachine7_refresh_req) begin
-            end else begin
-                if (litedramcore_sdram_bankmachine7_source_source_valid) begin
-                    if (litedramcore_sdram_bankmachine7_row_opened) begin
-                        if (litedramcore_sdram_bankmachine7_row_hit) begin
-                            if (litedramcore_sdram_bankmachine7_source_source_payload_we) begin
-                            end else begin
-                                litedramcore_sdram_bankmachine7_cmd_payload_is_read <= 1'd1;
-                            end
-                        end else begin
-                        end
-                    end else begin
-                    end
-                end
-            end
-        end
-    endcase
-end
-always @(*) begin
-    litedramcore_sdram_bankmachine7_cmd_payload_is_write <= 1'd0;
-    case (bankmachine7_state)
-        1'd1: begin
-        end
-        2'd2: begin
-        end
-        2'd3: begin
-        end
-        3'd4: begin
-        end
-        3'd5: begin
-        end
-        3'd6: begin
-        end
-        3'd7: begin
-        end
-        4'd8: begin
-        end
-        4'd9: begin
-        end
-        4'd10: begin
-        end
-        default: begin
-            if (litedramcore_sdram_bankmachine7_refresh_req) begin
-            end else begin
-                if (litedramcore_sdram_bankmachine7_source_source_valid) begin
-                    if (litedramcore_sdram_bankmachine7_row_opened) begin
-                        if (litedramcore_sdram_bankmachine7_row_hit) begin
-                            if (litedramcore_sdram_bankmachine7_source_source_payload_we) begin
-                                litedramcore_sdram_bankmachine7_cmd_payload_is_write <= 1'd1;
-                            end else begin
-                            end
-                        end else begin
-                        end
-                    end else begin
-                    end
-                end
-            end
-        end
-    endcase
-end
-always @(*) begin
-    litedramcore_sdram_bankmachine7_req_wdata_ready <= 1'd0;
-    case (bankmachine7_state)
-        1'd1: begin
-        end
-        2'd2: begin
-        end
-        2'd3: begin
-        end
-        3'd4: begin
-        end
-        3'd5: begin
-        end
-        3'd6: begin
-        end
-        3'd7: begin
-        end
-        4'd8: begin
-        end
-        4'd9: begin
-        end
-        4'd10: begin
-        end
-        default: begin
-            if (litedramcore_sdram_bankmachine7_refresh_req) begin
-            end else begin
-                if (litedramcore_sdram_bankmachine7_source_source_valid) begin
-                    if (litedramcore_sdram_bankmachine7_row_opened) begin
-                        if (litedramcore_sdram_bankmachine7_row_hit) begin
-                            if (litedramcore_sdram_bankmachine7_source_source_payload_we) begin
-                                litedramcore_sdram_bankmachine7_req_wdata_ready <= litedramcore_sdram_bankmachine7_cmd_ready;
-                            end else begin
-                            end
-                        end else begin
-                        end
-                    end else begin
-                    end
-                end
-            end
-        end
-    endcase
-end
-always @(*) begin
-    litedramcore_sdram_bankmachine7_req_rdata_valid <= 1'd0;
-    case (bankmachine7_state)
-        1'd1: begin
-        end
-        2'd2: begin
-        end
-        2'd3: begin
-        end
-        3'd4: begin
-        end
-        3'd5: begin
-        end
-        3'd6: begin
-        end
-        3'd7: begin
-        end
-        4'd8: begin
-        end
-        4'd9: begin
-        end
-        4'd10: begin
-        end
-        default: begin
-            if (litedramcore_sdram_bankmachine7_refresh_req) begin
-            end else begin
-                if (litedramcore_sdram_bankmachine7_source_source_valid) begin
-                    if (litedramcore_sdram_bankmachine7_row_opened) begin
-                        if (litedramcore_sdram_bankmachine7_row_hit) begin
-                            if (litedramcore_sdram_bankmachine7_source_source_payload_we) begin
-                            end else begin
-                                litedramcore_sdram_bankmachine7_req_rdata_valid <= litedramcore_sdram_bankmachine7_cmd_ready;
-                            end
-                        end else begin
-                        end
-                    end else begin
                     end
                 end
             end
@@ -12827,6 +12619,174 @@ always @(*) begin
         end
     endcase
 end
+always @(*) begin
+    litedramcore_sdram_bankmachine7_cmd_payload_is_read <= 1'd0;
+    case (bankmachine7_state)
+        1'd1: begin
+        end
+        2'd2: begin
+        end
+        2'd3: begin
+        end
+        3'd4: begin
+        end
+        3'd5: begin
+        end
+        3'd6: begin
+        end
+        3'd7: begin
+        end
+        4'd8: begin
+        end
+        4'd9: begin
+        end
+        4'd10: begin
+        end
+        default: begin
+            if (litedramcore_sdram_bankmachine7_refresh_req) begin
+            end else begin
+                if (litedramcore_sdram_bankmachine7_source_source_valid) begin
+                    if (litedramcore_sdram_bankmachine7_row_opened) begin
+                        if (litedramcore_sdram_bankmachine7_row_hit) begin
+                            if (litedramcore_sdram_bankmachine7_source_source_payload_we) begin
+                            end else begin
+                                litedramcore_sdram_bankmachine7_cmd_payload_is_read <= 1'd1;
+                            end
+                        end else begin
+                        end
+                    end else begin
+                    end
+                end
+            end
+        end
+    endcase
+end
+always @(*) begin
+    litedramcore_sdram_bankmachine7_cmd_payload_is_write <= 1'd0;
+    case (bankmachine7_state)
+        1'd1: begin
+        end
+        2'd2: begin
+        end
+        2'd3: begin
+        end
+        3'd4: begin
+        end
+        3'd5: begin
+        end
+        3'd6: begin
+        end
+        3'd7: begin
+        end
+        4'd8: begin
+        end
+        4'd9: begin
+        end
+        4'd10: begin
+        end
+        default: begin
+            if (litedramcore_sdram_bankmachine7_refresh_req) begin
+            end else begin
+                if (litedramcore_sdram_bankmachine7_source_source_valid) begin
+                    if (litedramcore_sdram_bankmachine7_row_opened) begin
+                        if (litedramcore_sdram_bankmachine7_row_hit) begin
+                            if (litedramcore_sdram_bankmachine7_source_source_payload_we) begin
+                                litedramcore_sdram_bankmachine7_cmd_payload_is_write <= 1'd1;
+                            end else begin
+                            end
+                        end else begin
+                        end
+                    end else begin
+                    end
+                end
+            end
+        end
+    endcase
+end
+always @(*) begin
+    litedramcore_sdram_bankmachine7_req_wdata_ready <= 1'd0;
+    case (bankmachine7_state)
+        1'd1: begin
+        end
+        2'd2: begin
+        end
+        2'd3: begin
+        end
+        3'd4: begin
+        end
+        3'd5: begin
+        end
+        3'd6: begin
+        end
+        3'd7: begin
+        end
+        4'd8: begin
+        end
+        4'd9: begin
+        end
+        4'd10: begin
+        end
+        default: begin
+            if (litedramcore_sdram_bankmachine7_refresh_req) begin
+            end else begin
+                if (litedramcore_sdram_bankmachine7_source_source_valid) begin
+                    if (litedramcore_sdram_bankmachine7_row_opened) begin
+                        if (litedramcore_sdram_bankmachine7_row_hit) begin
+                            if (litedramcore_sdram_bankmachine7_source_source_payload_we) begin
+                                litedramcore_sdram_bankmachine7_req_wdata_ready <= litedramcore_sdram_bankmachine7_cmd_ready;
+                            end else begin
+                            end
+                        end else begin
+                        end
+                    end else begin
+                    end
+                end
+            end
+        end
+    endcase
+end
+always @(*) begin
+    litedramcore_sdram_bankmachine7_req_rdata_valid <= 1'd0;
+    case (bankmachine7_state)
+        1'd1: begin
+        end
+        2'd2: begin
+        end
+        2'd3: begin
+        end
+        3'd4: begin
+        end
+        3'd5: begin
+        end
+        3'd6: begin
+        end
+        3'd7: begin
+        end
+        4'd8: begin
+        end
+        4'd9: begin
+        end
+        4'd10: begin
+        end
+        default: begin
+            if (litedramcore_sdram_bankmachine7_refresh_req) begin
+            end else begin
+                if (litedramcore_sdram_bankmachine7_source_source_valid) begin
+                    if (litedramcore_sdram_bankmachine7_row_opened) begin
+                        if (litedramcore_sdram_bankmachine7_row_hit) begin
+                            if (litedramcore_sdram_bankmachine7_source_source_payload_we) begin
+                            end else begin
+                                litedramcore_sdram_bankmachine7_req_rdata_valid <= litedramcore_sdram_bankmachine7_cmd_ready;
+                            end
+                        end else begin
+                        end
+                    end else begin
+                    end
+                end
+            end
+        end
+    endcase
+end
 assign litedramcore_sdram_nphases = (k7ddrphy_rdphase_storage - 1'd1);
 assign litedramcore_sdram_rdphase = (k7ddrphy_wrphase_storage - 1'd1);
 assign litedramcore_sdram_trrdcon_valid = ((litedramcore_sdram_choose_cmd_cmd_valid & litedramcore_sdram_choose_cmd_cmd_ready) & ((litedramcore_sdram_choose_cmd_cmd_payload_ras & (~litedramcore_sdram_choose_cmd_cmd_payload_cas)) & (~litedramcore_sdram_choose_cmd_cmd_payload_we)));
@@ -13077,6 +13037,222 @@ always @(*) begin
     endcase
 end
 always @(*) begin
+    litedramcore_sdram_choose_req_want_writes <= 1'd0;
+    case (multiplexer_state)
+        1'd1: begin
+            litedramcore_sdram_choose_req_want_writes <= 1'd1;
+        end
+        2'd2: begin
+        end
+        2'd3: begin
+        end
+        3'd4: begin
+        end
+        3'd5: begin
+        end
+        3'd6: begin
+        end
+        3'd7: begin
+        end
+        4'd8: begin
+        end
+        4'd9: begin
+        end
+        4'd10: begin
+        end
+        4'd11: begin
+        end
+        default: begin
+        end
+    endcase
+end
+always @(*) begin
+    litedramcore_sdram_steerer3 <= 2'd0;
+    case (multiplexer_state)
+        1'd1: begin
+            litedramcore_sdram_steerer3 <= 1'd0;
+            if ((k7ddrphy_wrphase_storage == 2'd3)) begin
+                litedramcore_sdram_steerer3 <= 2'd2;
+            end
+            if ((litedramcore_sdram_rdphase == 2'd3)) begin
+                litedramcore_sdram_steerer3 <= 1'd1;
+            end
+        end
+        2'd2: begin
+        end
+        2'd3: begin
+        end
+        3'd4: begin
+        end
+        3'd5: begin
+        end
+        3'd6: begin
+        end
+        3'd7: begin
+        end
+        4'd8: begin
+        end
+        4'd9: begin
+        end
+        4'd10: begin
+        end
+        4'd11: begin
+        end
+        default: begin
+            litedramcore_sdram_steerer3 <= 1'd0;
+            if ((k7ddrphy_rdphase_storage == 2'd3)) begin
+                litedramcore_sdram_steerer3 <= 2'd2;
+            end
+            if ((litedramcore_sdram_nphases == 2'd3)) begin
+                litedramcore_sdram_steerer3 <= 1'd1;
+            end
+        end
+    endcase
+end
+always @(*) begin
+    litedramcore_sdram_en0 <= 1'd0;
+    case (multiplexer_state)
+        1'd1: begin
+        end
+        2'd2: begin
+        end
+        2'd3: begin
+        end
+        3'd4: begin
+        end
+        3'd5: begin
+        end
+        3'd6: begin
+        end
+        3'd7: begin
+        end
+        4'd8: begin
+        end
+        4'd9: begin
+        end
+        4'd10: begin
+        end
+        4'd11: begin
+        end
+        default: begin
+            litedramcore_sdram_en0 <= 1'd1;
+        end
+    endcase
+end
+always @(*) begin
+    litedramcore_sdram_choose_req_cmd_ready <= 1'd0;
+    case (multiplexer_state)
+        1'd1: begin
+            if (1'd0) begin
+                litedramcore_sdram_choose_req_cmd_ready <= (litedramcore_sdram_cas_allowed & ((~((litedramcore_sdram_choose_req_cmd_payload_ras & (~litedramcore_sdram_choose_req_cmd_payload_cas)) & (~litedramcore_sdram_choose_req_cmd_payload_we))) | litedramcore_sdram_ras_allowed));
+            end else begin
+                litedramcore_sdram_choose_req_cmd_ready <= litedramcore_sdram_cas_allowed;
+            end
+        end
+        2'd2: begin
+        end
+        2'd3: begin
+        end
+        3'd4: begin
+        end
+        3'd5: begin
+        end
+        3'd6: begin
+        end
+        3'd7: begin
+        end
+        4'd8: begin
+        end
+        4'd9: begin
+        end
+        4'd10: begin
+        end
+        4'd11: begin
+        end
+        default: begin
+            if (1'd0) begin
+                litedramcore_sdram_choose_req_cmd_ready <= (litedramcore_sdram_cas_allowed & ((~((litedramcore_sdram_choose_req_cmd_payload_ras & (~litedramcore_sdram_choose_req_cmd_payload_cas)) & (~litedramcore_sdram_choose_req_cmd_payload_we))) | litedramcore_sdram_ras_allowed));
+            end else begin
+                litedramcore_sdram_choose_req_cmd_ready <= litedramcore_sdram_cas_allowed;
+            end
+        end
+    endcase
+end
+always @(*) begin
+    litedramcore_sdram_en1 <= 1'd0;
+    case (multiplexer_state)
+        1'd1: begin
+            litedramcore_sdram_en1 <= 1'd1;
+        end
+        2'd2: begin
+        end
+        2'd3: begin
+        end
+        3'd4: begin
+        end
+        3'd5: begin
+        end
+        3'd6: begin
+        end
+        3'd7: begin
+        end
+        4'd8: begin
+        end
+        4'd9: begin
+        end
+        4'd10: begin
+        end
+        4'd11: begin
+        end
+        default: begin
+        end
+    endcase
+end
+always @(*) begin
+    litedramcore_sdram_steerer0 <= 2'd0;
+    case (multiplexer_state)
+        1'd1: begin
+            litedramcore_sdram_steerer0 <= 1'd0;
+            if ((k7ddrphy_wrphase_storage == 1'd0)) begin
+                litedramcore_sdram_steerer0 <= 2'd2;
+            end
+            if ((litedramcore_sdram_rdphase == 1'd0)) begin
+                litedramcore_sdram_steerer0 <= 1'd1;
+            end
+        end
+        2'd2: begin
+            litedramcore_sdram_steerer0 <= 2'd3;
+        end
+        2'd3: begin
+        end
+        3'd4: begin
+        end
+        3'd5: begin
+        end
+        3'd6: begin
+        end
+        3'd7: begin
+        end
+        4'd8: begin
+        end
+        4'd9: begin
+        end
+        4'd10: begin
+        end
+        4'd11: begin
+        end
+        default: begin
+            litedramcore_sdram_steerer0 <= 1'd0;
+            if ((k7ddrphy_rdphase_storage == 1'd0)) begin
+                litedramcore_sdram_steerer0 <= 2'd2;
+            end
+            if ((litedramcore_sdram_nphases == 1'd0)) begin
+                litedramcore_sdram_steerer0 <= 1'd1;
+            end
+        end
+    endcase
+end
+always @(*) begin
     litedramcore_sdram_cmd_ready <= 1'd0;
     case (multiplexer_state)
         1'd1: begin
@@ -13230,49 +13406,6 @@ always @(*) begin
     endcase
 end
 always @(*) begin
-    litedramcore_sdram_steerer3 <= 2'd0;
-    case (multiplexer_state)
-        1'd1: begin
-            litedramcore_sdram_steerer3 <= 1'd0;
-            if ((k7ddrphy_wrphase_storage == 2'd3)) begin
-                litedramcore_sdram_steerer3 <= 2'd2;
-            end
-            if ((litedramcore_sdram_rdphase == 2'd3)) begin
-                litedramcore_sdram_steerer3 <= 1'd1;
-            end
-        end
-        2'd2: begin
-        end
-        2'd3: begin
-        end
-        3'd4: begin
-        end
-        3'd5: begin
-        end
-        3'd6: begin
-        end
-        3'd7: begin
-        end
-        4'd8: begin
-        end
-        4'd9: begin
-        end
-        4'd10: begin
-        end
-        4'd11: begin
-        end
-        default: begin
-            litedramcore_sdram_steerer3 <= 1'd0;
-            if ((k7ddrphy_rdphase_storage == 2'd3)) begin
-                litedramcore_sdram_steerer3 <= 2'd2;
-            end
-            if ((litedramcore_sdram_nphases == 2'd3)) begin
-                litedramcore_sdram_steerer3 <= 1'd1;
-            end
-        end
-    endcase
-end
-always @(*) begin
     litedramcore_sdram_choose_cmd_cmd_ready <= 1'd0;
     case (multiplexer_state)
         1'd1: begin
@@ -13336,179 +13469,6 @@ always @(*) begin
         end
         default: begin
             litedramcore_sdram_choose_req_want_reads <= 1'd1;
-        end
-    endcase
-end
-always @(*) begin
-    litedramcore_sdram_choose_req_want_writes <= 1'd0;
-    case (multiplexer_state)
-        1'd1: begin
-            litedramcore_sdram_choose_req_want_writes <= 1'd1;
-        end
-        2'd2: begin
-        end
-        2'd3: begin
-        end
-        3'd4: begin
-        end
-        3'd5: begin
-        end
-        3'd6: begin
-        end
-        3'd7: begin
-        end
-        4'd8: begin
-        end
-        4'd9: begin
-        end
-        4'd10: begin
-        end
-        4'd11: begin
-        end
-        default: begin
-        end
-    endcase
-end
-always @(*) begin
-    litedramcore_sdram_en0 <= 1'd0;
-    case (multiplexer_state)
-        1'd1: begin
-        end
-        2'd2: begin
-        end
-        2'd3: begin
-        end
-        3'd4: begin
-        end
-        3'd5: begin
-        end
-        3'd6: begin
-        end
-        3'd7: begin
-        end
-        4'd8: begin
-        end
-        4'd9: begin
-        end
-        4'd10: begin
-        end
-        4'd11: begin
-        end
-        default: begin
-            litedramcore_sdram_en0 <= 1'd1;
-        end
-    endcase
-end
-always @(*) begin
-    litedramcore_sdram_choose_req_cmd_ready <= 1'd0;
-    case (multiplexer_state)
-        1'd1: begin
-            if (1'd0) begin
-                litedramcore_sdram_choose_req_cmd_ready <= (litedramcore_sdram_cas_allowed & ((~((litedramcore_sdram_choose_req_cmd_payload_ras & (~litedramcore_sdram_choose_req_cmd_payload_cas)) & (~litedramcore_sdram_choose_req_cmd_payload_we))) | litedramcore_sdram_ras_allowed));
-            end else begin
-                litedramcore_sdram_choose_req_cmd_ready <= litedramcore_sdram_cas_allowed;
-            end
-        end
-        2'd2: begin
-        end
-        2'd3: begin
-        end
-        3'd4: begin
-        end
-        3'd5: begin
-        end
-        3'd6: begin
-        end
-        3'd7: begin
-        end
-        4'd8: begin
-        end
-        4'd9: begin
-        end
-        4'd10: begin
-        end
-        4'd11: begin
-        end
-        default: begin
-            if (1'd0) begin
-                litedramcore_sdram_choose_req_cmd_ready <= (litedramcore_sdram_cas_allowed & ((~((litedramcore_sdram_choose_req_cmd_payload_ras & (~litedramcore_sdram_choose_req_cmd_payload_cas)) & (~litedramcore_sdram_choose_req_cmd_payload_we))) | litedramcore_sdram_ras_allowed));
-            end else begin
-                litedramcore_sdram_choose_req_cmd_ready <= litedramcore_sdram_cas_allowed;
-            end
-        end
-    endcase
-end
-always @(*) begin
-    litedramcore_sdram_en1 <= 1'd0;
-    case (multiplexer_state)
-        1'd1: begin
-            litedramcore_sdram_en1 <= 1'd1;
-        end
-        2'd2: begin
-        end
-        2'd3: begin
-        end
-        3'd4: begin
-        end
-        3'd5: begin
-        end
-        3'd6: begin
-        end
-        3'd7: begin
-        end
-        4'd8: begin
-        end
-        4'd9: begin
-        end
-        4'd10: begin
-        end
-        4'd11: begin
-        end
-        default: begin
-        end
-    endcase
-end
-always @(*) begin
-    litedramcore_sdram_steerer0 <= 2'd0;
-    case (multiplexer_state)
-        1'd1: begin
-            litedramcore_sdram_steerer0 <= 1'd0;
-            if ((k7ddrphy_wrphase_storage == 1'd0)) begin
-                litedramcore_sdram_steerer0 <= 2'd2;
-            end
-            if ((litedramcore_sdram_rdphase == 1'd0)) begin
-                litedramcore_sdram_steerer0 <= 1'd1;
-            end
-        end
-        2'd2: begin
-            litedramcore_sdram_steerer0 <= 2'd3;
-        end
-        2'd3: begin
-        end
-        3'd4: begin
-        end
-        3'd5: begin
-        end
-        3'd6: begin
-        end
-        3'd7: begin
-        end
-        4'd8: begin
-        end
-        4'd9: begin
-        end
-        4'd10: begin
-        end
-        4'd11: begin
-        end
-        default: begin
-            litedramcore_sdram_steerer0 <= 1'd0;
-            if ((k7ddrphy_rdphase_storage == 1'd0)) begin
-                litedramcore_sdram_steerer0 <= 2'd2;
-            end
-            if ((litedramcore_sdram_nphases == 1'd0)) begin
-                litedramcore_sdram_steerer0 <= 1'd1;
-            end
         end
     endcase
 end
@@ -13590,14 +13550,6 @@ assign litedramcore_port_rdata_payload_data = litedramcore_sdram_interface_rdata
 assign rdata_payload_data = litedramcore_sdram_interface_rdata;
 assign litedramcore_data_port_adr = litedramcore_wb_sdram_adr[3];
 always @(*) begin
-    litedramcore_data_port_dat_w <= 256'd0;
-    if (litedramcore_write_from_slave) begin
-        litedramcore_data_port_dat_w <= litedramcore_interface_dat_r;
-    end else begin
-        litedramcore_data_port_dat_w <= {8{litedramcore_wb_sdram_dat_w}};
-    end
-end
-always @(*) begin
     litedramcore_data_port_we <= 32'd0;
     if (litedramcore_write_from_slave) begin
         litedramcore_data_port_we <= {32{1'd1}};
@@ -13605,6 +13557,14 @@ always @(*) begin
         if ((((litedramcore_wb_sdram_cyc & litedramcore_wb_sdram_stb) & litedramcore_wb_sdram_we) & litedramcore_wb_sdram_ack)) begin
             litedramcore_data_port_we <= {({4{(litedramcore_wb_sdram_adr[2:0] == 3'd7)}} & litedramcore_wb_sdram_sel), ({4{(litedramcore_wb_sdram_adr[2:0] == 3'd6)}} & litedramcore_wb_sdram_sel), ({4{(litedramcore_wb_sdram_adr[2:0] == 3'd5)}} & litedramcore_wb_sdram_sel), ({4{(litedramcore_wb_sdram_adr[2:0] == 3'd4)}} & litedramcore_wb_sdram_sel), ({4{(litedramcore_wb_sdram_adr[2:0] == 2'd3)}} & litedramcore_wb_sdram_sel), ({4{(litedramcore_wb_sdram_adr[2:0] == 2'd2)}} & litedramcore_wb_sdram_sel), ({4{(litedramcore_wb_sdram_adr[2:0] == 1'd1)}} & litedramcore_wb_sdram_sel), ({4{(litedramcore_wb_sdram_adr[2:0] == 1'd0)}} & litedramcore_wb_sdram_sel)};
         end
+    end
+end
+always @(*) begin
+    litedramcore_data_port_dat_w <= 256'd0;
+    if (litedramcore_write_from_slave) begin
+        litedramcore_data_port_dat_w <= litedramcore_interface_dat_r;
+    end else begin
+        litedramcore_data_port_dat_w <= {8{litedramcore_wb_sdram_dat_w}};
     end
 end
 assign litedramcore_interface_dat_w = litedramcore_data_port_dat_r;
@@ -13679,87 +13639,6 @@ always @(*) begin
             if ((litedramcore_wb_sdram_cyc & litedramcore_wb_sdram_stb)) begin
                 fullmemorywe_next_state <= 1'd1;
             end
-        end
-    endcase
-end
-always @(*) begin
-    litedramcore_tag_di_dirty <= 1'd0;
-    case (fullmemorywe_state)
-        1'd1: begin
-            if ((litedramcore_tag_do_tag == litedramcore_wb_sdram_adr[29:4])) begin
-                if (litedramcore_wb_sdram_we) begin
-                    litedramcore_tag_di_dirty <= 1'd1;
-                end
-            end else begin
-            end
-        end
-        2'd2: begin
-        end
-        2'd3: begin
-        end
-        default: begin
-        end
-    endcase
-end
-always @(*) begin
-    litedramcore_wb_sdram_ack <= 1'd0;
-    case (fullmemorywe_state)
-        1'd1: begin
-            if ((litedramcore_tag_do_tag == litedramcore_wb_sdram_adr[29:4])) begin
-                litedramcore_wb_sdram_ack <= 1'd1;
-            end else begin
-            end
-        end
-        2'd2: begin
-        end
-        2'd3: begin
-        end
-        default: begin
-        end
-    endcase
-end
-always @(*) begin
-    litedramcore_word_clr <= 1'd0;
-    case (fullmemorywe_state)
-        1'd1: begin
-            litedramcore_word_clr <= 1'd1;
-            if ((litedramcore_tag_do_tag == litedramcore_wb_sdram_adr[29:4])) begin
-            end else begin
-                if (litedramcore_tag_do_dirty) begin
-                end else begin
-                    litedramcore_word_clr <= 1'd1;
-                end
-            end
-        end
-        2'd2: begin
-            if (litedramcore_interface_ack) begin
-                if (1'd1) begin
-                    litedramcore_word_clr <= 1'd1;
-                end
-            end
-        end
-        2'd3: begin
-        end
-        default: begin
-        end
-    endcase
-end
-always @(*) begin
-    litedramcore_word_inc <= 1'd0;
-    case (fullmemorywe_state)
-        1'd1: begin
-        end
-        2'd2: begin
-            if (litedramcore_interface_ack) begin
-                litedramcore_word_inc <= 1'd1;
-            end
-        end
-        2'd3: begin
-            if (litedramcore_interface_ack) begin
-                litedramcore_word_inc <= 1'd1;
-            end
-        end
-        default: begin
         end
     endcase
 end
@@ -13852,6 +13731,87 @@ always @(*) begin
         end
     endcase
 end
+always @(*) begin
+    litedramcore_wb_sdram_ack <= 1'd0;
+    case (fullmemorywe_state)
+        1'd1: begin
+            if ((litedramcore_tag_do_tag == litedramcore_wb_sdram_adr[29:4])) begin
+                litedramcore_wb_sdram_ack <= 1'd1;
+            end else begin
+            end
+        end
+        2'd2: begin
+        end
+        2'd3: begin
+        end
+        default: begin
+        end
+    endcase
+end
+always @(*) begin
+    litedramcore_tag_di_dirty <= 1'd0;
+    case (fullmemorywe_state)
+        1'd1: begin
+            if ((litedramcore_tag_do_tag == litedramcore_wb_sdram_adr[29:4])) begin
+                if (litedramcore_wb_sdram_we) begin
+                    litedramcore_tag_di_dirty <= 1'd1;
+                end
+            end else begin
+            end
+        end
+        2'd2: begin
+        end
+        2'd3: begin
+        end
+        default: begin
+        end
+    endcase
+end
+always @(*) begin
+    litedramcore_word_clr <= 1'd0;
+    case (fullmemorywe_state)
+        1'd1: begin
+            litedramcore_word_clr <= 1'd1;
+            if ((litedramcore_tag_do_tag == litedramcore_wb_sdram_adr[29:4])) begin
+            end else begin
+                if (litedramcore_tag_do_dirty) begin
+                end else begin
+                    litedramcore_word_clr <= 1'd1;
+                end
+            end
+        end
+        2'd2: begin
+            if (litedramcore_interface_ack) begin
+                if (1'd1) begin
+                    litedramcore_word_clr <= 1'd1;
+                end
+            end
+        end
+        2'd3: begin
+        end
+        default: begin
+        end
+    endcase
+end
+always @(*) begin
+    litedramcore_word_inc <= 1'd0;
+    case (fullmemorywe_state)
+        1'd1: begin
+        end
+        2'd2: begin
+            if (litedramcore_interface_ack) begin
+                litedramcore_word_inc <= 1'd1;
+            end
+        end
+        2'd3: begin
+            if (litedramcore_interface_ack) begin
+                litedramcore_word_inc <= 1'd1;
+            end
+        end
+        default: begin
+        end
+    endcase
+end
 assign litedramcore_port_cmd_payload_addr = (litedramcore_interface_adr - 26'd33554432);
 assign litedramcore_port_cmd_payload_we = litedramcore_interface_we;
 assign litedramcore_port_cmd_last = (~litedramcore_interface_we);
@@ -13889,34 +13849,6 @@ always @(*) begin
             if (((litedramcore_port_cmd_valid & litedramcore_port_cmd_ready) & (~litedramcore_interface_we))) begin
                 litedramwishbone2native0_next_state <= 2'd2;
             end
-        end
-    endcase
-end
-always @(*) begin
-    litedramcore_aborted_litedramwishbone2native0_next_value <= 1'd0;
-    case (litedramwishbone2native0_state)
-        1'd1: begin
-            litedramcore_aborted_litedramwishbone2native0_next_value <= ((~litedramcore_interface_cyc) | litedramcore_aborted);
-        end
-        2'd2: begin
-            litedramcore_aborted_litedramwishbone2native0_next_value <= ((~litedramcore_interface_cyc) | litedramcore_aborted);
-        end
-        default: begin
-            litedramcore_aborted_litedramwishbone2native0_next_value <= 1'd0;
-        end
-    endcase
-end
-always @(*) begin
-    litedramcore_aborted_litedramwishbone2native0_next_value_ce <= 1'd0;
-    case (litedramwishbone2native0_state)
-        1'd1: begin
-            litedramcore_aborted_litedramwishbone2native0_next_value_ce <= 1'd1;
-        end
-        2'd2: begin
-            litedramcore_aborted_litedramwishbone2native0_next_value_ce <= 1'd1;
-        end
-        default: begin
-            litedramcore_aborted_litedramwishbone2native0_next_value_ce <= 1'd1;
         end
     endcase
 end
@@ -13975,6 +13907,34 @@ always @(*) begin
         end
     endcase
 end
+always @(*) begin
+    litedramcore_aborted_litedramwishbone2native0_next_value <= 1'd0;
+    case (litedramwishbone2native0_state)
+        1'd1: begin
+            litedramcore_aborted_litedramwishbone2native0_next_value <= ((~litedramcore_interface_cyc) | litedramcore_aborted);
+        end
+        2'd2: begin
+            litedramcore_aborted_litedramwishbone2native0_next_value <= ((~litedramcore_interface_cyc) | litedramcore_aborted);
+        end
+        default: begin
+            litedramcore_aborted_litedramwishbone2native0_next_value <= 1'd0;
+        end
+    endcase
+end
+always @(*) begin
+    litedramcore_aborted_litedramwishbone2native0_next_value_ce <= 1'd0;
+    case (litedramwishbone2native0_state)
+        1'd1: begin
+            litedramcore_aborted_litedramwishbone2native0_next_value_ce <= 1'd1;
+        end
+        2'd2: begin
+            litedramcore_aborted_litedramwishbone2native0_next_value_ce <= 1'd1;
+        end
+        default: begin
+            litedramcore_aborted_litedramwishbone2native0_next_value_ce <= 1'd1;
+        end
+    endcase
+end
 assign cmd_payload_addr = (wb_port_adr - 1'd0);
 assign cmd_payload_we = wb_port_we;
 assign cmd_last = (~wb_port_we);
@@ -14012,51 +13972,6 @@ always @(*) begin
             if (((cmd_valid & cmd_ready) & (~wb_port_we))) begin
                 litedramwishbone2native1_next_state <= 2'd2;
             end
-        end
-    endcase
-end
-always @(*) begin
-    wishbone2native_aborted_litedramwishbone2native1_next_value <= 1'd0;
-    case (litedramwishbone2native1_state)
-        1'd1: begin
-            wishbone2native_aborted_litedramwishbone2native1_next_value <= ((~wb_port_cyc) | wishbone2native_aborted);
-        end
-        2'd2: begin
-            wishbone2native_aborted_litedramwishbone2native1_next_value <= ((~wb_port_cyc) | wishbone2native_aborted);
-        end
-        default: begin
-            wishbone2native_aborted_litedramwishbone2native1_next_value <= 1'd0;
-        end
-    endcase
-end
-always @(*) begin
-    wishbone2native_aborted_litedramwishbone2native1_next_value_ce <= 1'd0;
-    case (litedramwishbone2native1_state)
-        1'd1: begin
-            wishbone2native_aborted_litedramwishbone2native1_next_value_ce <= 1'd1;
-        end
-        2'd2: begin
-            wishbone2native_aborted_litedramwishbone2native1_next_value_ce <= 1'd1;
-        end
-        default: begin
-            wishbone2native_aborted_litedramwishbone2native1_next_value_ce <= 1'd1;
-        end
-    endcase
-end
-always @(*) begin
-    wb_port_ack <= 1'd0;
-    case (litedramwishbone2native1_state)
-        1'd1: begin
-            if ((wdata_valid & wdata_ready)) begin
-                wb_port_ack <= (wb_port_cyc & (~wishbone2native_aborted));
-            end
-        end
-        2'd2: begin
-            if (rdata_valid) begin
-                wb_port_ack <= (wb_port_cyc & (~wishbone2native_aborted));
-            end
-        end
-        default: begin
         end
     endcase
 end
@@ -14099,6 +14014,51 @@ always @(*) begin
     endcase
 end
 always @(*) begin
+    wishbone2native_aborted_litedramwishbone2native1_next_value <= 1'd0;
+    case (litedramwishbone2native1_state)
+        1'd1: begin
+            wishbone2native_aborted_litedramwishbone2native1_next_value <= ((~wb_port_cyc) | wishbone2native_aborted);
+        end
+        2'd2: begin
+            wishbone2native_aborted_litedramwishbone2native1_next_value <= ((~wb_port_cyc) | wishbone2native_aborted);
+        end
+        default: begin
+            wishbone2native_aborted_litedramwishbone2native1_next_value <= 1'd0;
+        end
+    endcase
+end
+always @(*) begin
+    wb_port_ack <= 1'd0;
+    case (litedramwishbone2native1_state)
+        1'd1: begin
+            if ((wdata_valid & wdata_ready)) begin
+                wb_port_ack <= (wb_port_cyc & (~wishbone2native_aborted));
+            end
+        end
+        2'd2: begin
+            if (rdata_valid) begin
+                wb_port_ack <= (wb_port_cyc & (~wishbone2native_aborted));
+            end
+        end
+        default: begin
+        end
+    endcase
+end
+always @(*) begin
+    wishbone2native_aborted_litedramwishbone2native1_next_value_ce <= 1'd0;
+    case (litedramwishbone2native1_state)
+        1'd1: begin
+            wishbone2native_aborted_litedramwishbone2native1_next_value_ce <= 1'd1;
+        end
+        2'd2: begin
+            wishbone2native_aborted_litedramwishbone2native1_next_value_ce <= 1'd1;
+        end
+        default: begin
+            wishbone2native_aborted_litedramwishbone2native1_next_value_ce <= 1'd1;
+        end
+    endcase
+end
+always @(*) begin
     wishbone2csr_next_state <= 2'd0;
     wishbone2csr_next_state <= wishbone2csr_state;
     case (wishbone2csr_state)
@@ -14112,6 +14072,99 @@ always @(*) begin
             if ((interface0_cyc & interface0_stb)) begin
                 wishbone2csr_next_state <= 1'd1;
             end
+        end
+    endcase
+end
+always @(*) begin
+    interface1_re_wishbone2csr_next_value_ce2 <= 1'd0;
+    case (wishbone2csr_state)
+        1'd1: begin
+            interface1_re_wishbone2csr_next_value_ce2 <= 1'd1;
+        end
+        2'd2: begin
+        end
+        default: begin
+            if ((interface0_cyc & interface0_stb)) begin
+                interface1_re_wishbone2csr_next_value_ce2 <= 1'd1;
+            end
+        end
+    endcase
+end
+always @(*) begin
+    interface0_dat_r <= 32'd0;
+    case (wishbone2csr_state)
+        1'd1: begin
+        end
+        2'd2: begin
+            interface0_dat_r <= interface1_dat_r;
+        end
+        default: begin
+        end
+    endcase
+end
+always @(*) begin
+    interface1_we_wishbone2csr_next_value3 <= 1'd0;
+    case (wishbone2csr_state)
+        1'd1: begin
+            interface1_we_wishbone2csr_next_value3 <= 1'd0;
+        end
+        2'd2: begin
+        end
+        default: begin
+            if ((interface0_cyc & interface0_stb)) begin
+                interface1_we_wishbone2csr_next_value3 <= (interface0_we & (interface0_sel != 1'd0));
+            end
+        end
+    endcase
+end
+always @(*) begin
+    interface0_ack <= 1'd0;
+    case (wishbone2csr_state)
+        1'd1: begin
+        end
+        2'd2: begin
+            interface0_ack <= 1'd1;
+        end
+        default: begin
+        end
+    endcase
+end
+always @(*) begin
+    interface1_we_wishbone2csr_next_value_ce3 <= 1'd0;
+    case (wishbone2csr_state)
+        1'd1: begin
+            interface1_we_wishbone2csr_next_value_ce3 <= 1'd1;
+        end
+        2'd2: begin
+        end
+        default: begin
+            if ((interface0_cyc & interface0_stb)) begin
+                interface1_we_wishbone2csr_next_value_ce3 <= 1'd1;
+            end
+        end
+    endcase
+end
+always @(*) begin
+    interface1_dat_w_wishbone2csr_next_value0 <= 32'd0;
+    case (wishbone2csr_state)
+        1'd1: begin
+        end
+        2'd2: begin
+        end
+        default: begin
+            interface1_dat_w_wishbone2csr_next_value0 <= interface0_dat_w;
+        end
+    endcase
+end
+always @(*) begin
+    interface1_dat_w_wishbone2csr_next_value_ce0 <= 1'd0;
+    case (wishbone2csr_state)
+        1'd1: begin
+        end
+        2'd2: begin
+        end
+        default: begin
+            interface1_dat_w_wishbone2csr_next_value_ce0 <= 1'd1;
         end
     endcase
 end
@@ -14146,18 +14199,6 @@ always @(*) begin
     endcase
 end
 always @(*) begin
-    interface0_dat_r <= 32'd0;
-    case (wishbone2csr_state)
-        1'd1: begin
-        end
-        2'd2: begin
-            interface0_dat_r <= interface1_dat_r;
-        end
-        default: begin
-        end
-    endcase
-end
-always @(*) begin
     interface1_re_wishbone2csr_next_value2 <= 1'd0;
     case (wishbone2csr_state)
         1'd1: begin
@@ -14172,112 +14213,31 @@ always @(*) begin
         end
     endcase
 end
-always @(*) begin
-    interface1_re_wishbone2csr_next_value_ce2 <= 1'd0;
-    case (wishbone2csr_state)
-        1'd1: begin
-            interface1_re_wishbone2csr_next_value_ce2 <= 1'd1;
-        end
-        2'd2: begin
-        end
-        default: begin
-            if ((interface0_cyc & interface0_stb)) begin
-                interface1_re_wishbone2csr_next_value_ce2 <= 1'd1;
-            end
-        end
-    endcase
-end
-always @(*) begin
-    interface1_we_wishbone2csr_next_value3 <= 1'd0;
-    case (wishbone2csr_state)
-        1'd1: begin
-            interface1_we_wishbone2csr_next_value3 <= 1'd0;
-        end
-        2'd2: begin
-        end
-        default: begin
-            if ((interface0_cyc & interface0_stb)) begin
-                interface1_we_wishbone2csr_next_value3 <= (interface0_we & (interface0_sel != 1'd0));
-            end
-        end
-    endcase
-end
-always @(*) begin
-    interface1_we_wishbone2csr_next_value_ce3 <= 1'd0;
-    case (wishbone2csr_state)
-        1'd1: begin
-            interface1_we_wishbone2csr_next_value_ce3 <= 1'd1;
-        end
-        2'd2: begin
-        end
-        default: begin
-            if ((interface0_cyc & interface0_stb)) begin
-                interface1_we_wishbone2csr_next_value_ce3 <= 1'd1;
-            end
-        end
-    endcase
-end
-always @(*) begin
-    interface0_ack <= 1'd0;
-    case (wishbone2csr_state)
-        1'd1: begin
-        end
-        2'd2: begin
-            interface0_ack <= 1'd1;
-        end
-        default: begin
-        end
-    endcase
-end
-always @(*) begin
-    interface1_dat_w_wishbone2csr_next_value0 <= 32'd0;
-    case (wishbone2csr_state)
-        1'd1: begin
-        end
-        2'd2: begin
-        end
-        default: begin
-            interface1_dat_w_wishbone2csr_next_value0 <= interface0_dat_w;
-        end
-    endcase
-end
-always @(*) begin
-    interface1_dat_w_wishbone2csr_next_value_ce0 <= 1'd0;
-    case (wishbone2csr_state)
-        1'd1: begin
-        end
-        2'd2: begin
-        end
-        default: begin
-            interface1_dat_w_wishbone2csr_next_value_ce0 <= 1'd1;
-        end
-    endcase
-end
 assign csrbank0_sel = (interface0_bank_bus_adr[13:9] == 1'd0);
 assign csrbank0_reset0_r = interface0_bank_bus_dat_w[1:0];
-always @(*) begin
-    csrbank0_reset0_we <= 1'd0;
-    if ((csrbank0_sel & (interface0_bank_bus_adr[8:0] == 1'd0))) begin
-        csrbank0_reset0_we <= interface0_bank_bus_re;
-    end
-end
 always @(*) begin
     csrbank0_reset0_re <= 1'd0;
     if ((csrbank0_sel & (interface0_bank_bus_adr[8:0] == 1'd0))) begin
         csrbank0_reset0_re <= interface0_bank_bus_we;
     end
 end
-assign csrbank0_scratch0_r = interface0_bank_bus_dat_w;
 always @(*) begin
-    csrbank0_scratch0_re <= 1'd0;
-    if ((csrbank0_sel & (interface0_bank_bus_adr[8:0] == 1'd1))) begin
-        csrbank0_scratch0_re <= interface0_bank_bus_we;
+    csrbank0_reset0_we <= 1'd0;
+    if ((csrbank0_sel & (interface0_bank_bus_adr[8:0] == 1'd0))) begin
+        csrbank0_reset0_we <= interface0_bank_bus_re;
     end
 end
+assign csrbank0_scratch0_r = interface0_bank_bus_dat_w;
 always @(*) begin
     csrbank0_scratch0_we <= 1'd0;
     if ((csrbank0_sel & (interface0_bank_bus_adr[8:0] == 1'd1))) begin
         csrbank0_scratch0_we <= interface0_bank_bus_re;
+    end
+end
+always @(*) begin
+    csrbank0_scratch0_re <= 1'd0;
+    if ((csrbank0_sel & (interface0_bank_bus_adr[8:0] == 1'd1))) begin
+        csrbank0_scratch0_re <= interface0_bank_bus_we;
     end
 end
 assign csrbank0_bus_errors_r = interface0_bank_bus_dat_w;
@@ -14307,15 +14267,15 @@ assign litedramcore_bus_errors_we = csrbank0_bus_errors_we;
 assign csrbank1_sel = (interface1_bank_bus_adr[13:9] == 1'd1);
 assign csrbank1_init_done0_r = interface1_bank_bus_dat_w[0];
 always @(*) begin
-    csrbank1_init_done0_re <= 1'd0;
-    if ((csrbank1_sel & (interface1_bank_bus_adr[8:0] == 1'd0))) begin
-        csrbank1_init_done0_re <= interface1_bank_bus_we;
-    end
-end
-always @(*) begin
     csrbank1_init_done0_we <= 1'd0;
     if ((csrbank1_sel & (interface1_bank_bus_adr[8:0] == 1'd0))) begin
         csrbank1_init_done0_we <= interface1_bank_bus_re;
+    end
+end
+always @(*) begin
+    csrbank1_init_done0_re <= 1'd0;
+    if ((csrbank1_sel & (interface1_bank_bus_adr[8:0] == 1'd0))) begin
+        csrbank1_init_done0_re <= interface1_bank_bus_we;
     end
 end
 assign csrbank1_init_error0_r = interface1_bank_bus_dat_w[0];
@@ -14349,41 +14309,41 @@ always @(*) begin
 end
 assign csrbank2_dly_sel0_r = interface2_bank_bus_dat_w[3:0];
 always @(*) begin
-    csrbank2_dly_sel0_we <= 1'd0;
-    if ((csrbank2_sel & (interface2_bank_bus_adr[8:0] == 1'd1))) begin
-        csrbank2_dly_sel0_we <= interface2_bank_bus_re;
-    end
-end
-always @(*) begin
     csrbank2_dly_sel0_re <= 1'd0;
     if ((csrbank2_sel & (interface2_bank_bus_adr[8:0] == 1'd1))) begin
         csrbank2_dly_sel0_re <= interface2_bank_bus_we;
     end
 end
-assign csrbank2_half_sys8x_taps0_r = interface2_bank_bus_dat_w[4:0];
 always @(*) begin
-    csrbank2_half_sys8x_taps0_re <= 1'd0;
-    if ((csrbank2_sel & (interface2_bank_bus_adr[8:0] == 2'd2))) begin
-        csrbank2_half_sys8x_taps0_re <= interface2_bank_bus_we;
+    csrbank2_dly_sel0_we <= 1'd0;
+    if ((csrbank2_sel & (interface2_bank_bus_adr[8:0] == 1'd1))) begin
+        csrbank2_dly_sel0_we <= interface2_bank_bus_re;
     end
 end
+assign csrbank2_half_sys8x_taps0_r = interface2_bank_bus_dat_w[4:0];
 always @(*) begin
     csrbank2_half_sys8x_taps0_we <= 1'd0;
     if ((csrbank2_sel & (interface2_bank_bus_adr[8:0] == 2'd2))) begin
         csrbank2_half_sys8x_taps0_we <= interface2_bank_bus_re;
     end
 end
-assign csrbank2_wlevel_en0_r = interface2_bank_bus_dat_w[0];
 always @(*) begin
-    csrbank2_wlevel_en0_we <= 1'd0;
-    if ((csrbank2_sel & (interface2_bank_bus_adr[8:0] == 2'd3))) begin
-        csrbank2_wlevel_en0_we <= interface2_bank_bus_re;
+    csrbank2_half_sys8x_taps0_re <= 1'd0;
+    if ((csrbank2_sel & (interface2_bank_bus_adr[8:0] == 2'd2))) begin
+        csrbank2_half_sys8x_taps0_re <= interface2_bank_bus_we;
     end
 end
+assign csrbank2_wlevel_en0_r = interface2_bank_bus_dat_w[0];
 always @(*) begin
     csrbank2_wlevel_en0_re <= 1'd0;
     if ((csrbank2_sel & (interface2_bank_bus_adr[8:0] == 2'd3))) begin
         csrbank2_wlevel_en0_re <= interface2_bank_bus_we;
+    end
+end
+always @(*) begin
+    csrbank2_wlevel_en0_we <= 1'd0;
+    if ((csrbank2_sel & (interface2_bank_bus_adr[8:0] == 2'd3))) begin
+        csrbank2_wlevel_en0_we <= interface2_bank_bus_re;
     end
 end
 assign k7ddrphy_wlevel_strobe_r = interface2_bank_bus_dat_w[0];
@@ -14401,41 +14361,41 @@ always @(*) begin
 end
 assign k7ddrphy_cdly_rst_r = interface2_bank_bus_dat_w[0];
 always @(*) begin
-    k7ddrphy_cdly_rst_re <= 1'd0;
-    if ((csrbank2_sel & (interface2_bank_bus_adr[8:0] == 3'd5))) begin
-        k7ddrphy_cdly_rst_re <= interface2_bank_bus_we;
-    end
-end
-always @(*) begin
     k7ddrphy_cdly_rst_we <= 1'd0;
     if ((csrbank2_sel & (interface2_bank_bus_adr[8:0] == 3'd5))) begin
         k7ddrphy_cdly_rst_we <= interface2_bank_bus_re;
     end
 end
-assign k7ddrphy_cdly_inc_r = interface2_bank_bus_dat_w[0];
 always @(*) begin
-    k7ddrphy_cdly_inc_re <= 1'd0;
-    if ((csrbank2_sel & (interface2_bank_bus_adr[8:0] == 3'd6))) begin
-        k7ddrphy_cdly_inc_re <= interface2_bank_bus_we;
+    k7ddrphy_cdly_rst_re <= 1'd0;
+    if ((csrbank2_sel & (interface2_bank_bus_adr[8:0] == 3'd5))) begin
+        k7ddrphy_cdly_rst_re <= interface2_bank_bus_we;
     end
 end
+assign k7ddrphy_cdly_inc_r = interface2_bank_bus_dat_w[0];
 always @(*) begin
     k7ddrphy_cdly_inc_we <= 1'd0;
     if ((csrbank2_sel & (interface2_bank_bus_adr[8:0] == 3'd6))) begin
         k7ddrphy_cdly_inc_we <= interface2_bank_bus_re;
     end
 end
-assign k7ddrphy_rdly_dq_rst_r = interface2_bank_bus_dat_w[0];
 always @(*) begin
-    k7ddrphy_rdly_dq_rst_re <= 1'd0;
-    if ((csrbank2_sel & (interface2_bank_bus_adr[8:0] == 3'd7))) begin
-        k7ddrphy_rdly_dq_rst_re <= interface2_bank_bus_we;
+    k7ddrphy_cdly_inc_re <= 1'd0;
+    if ((csrbank2_sel & (interface2_bank_bus_adr[8:0] == 3'd6))) begin
+        k7ddrphy_cdly_inc_re <= interface2_bank_bus_we;
     end
 end
+assign k7ddrphy_rdly_dq_rst_r = interface2_bank_bus_dat_w[0];
 always @(*) begin
     k7ddrphy_rdly_dq_rst_we <= 1'd0;
     if ((csrbank2_sel & (interface2_bank_bus_adr[8:0] == 3'd7))) begin
         k7ddrphy_rdly_dq_rst_we <= interface2_bank_bus_re;
+    end
+end
+always @(*) begin
+    k7ddrphy_rdly_dq_rst_re <= 1'd0;
+    if ((csrbank2_sel & (interface2_bank_bus_adr[8:0] == 3'd7))) begin
+        k7ddrphy_rdly_dq_rst_re <= interface2_bank_bus_we;
     end
 end
 assign k7ddrphy_rdly_dq_inc_r = interface2_bank_bus_dat_w[0];
@@ -14453,41 +14413,41 @@ always @(*) begin
 end
 assign k7ddrphy_rdly_dq_bitslip_rst_r = interface2_bank_bus_dat_w[0];
 always @(*) begin
-    k7ddrphy_rdly_dq_bitslip_rst_we <= 1'd0;
-    if ((csrbank2_sel & (interface2_bank_bus_adr[8:0] == 4'd9))) begin
-        k7ddrphy_rdly_dq_bitslip_rst_we <= interface2_bank_bus_re;
-    end
-end
-always @(*) begin
     k7ddrphy_rdly_dq_bitslip_rst_re <= 1'd0;
     if ((csrbank2_sel & (interface2_bank_bus_adr[8:0] == 4'd9))) begin
         k7ddrphy_rdly_dq_bitslip_rst_re <= interface2_bank_bus_we;
     end
 end
-assign k7ddrphy_rdly_dq_bitslip_r = interface2_bank_bus_dat_w[0];
 always @(*) begin
-    k7ddrphy_rdly_dq_bitslip_we <= 1'd0;
-    if ((csrbank2_sel & (interface2_bank_bus_adr[8:0] == 4'd10))) begin
-        k7ddrphy_rdly_dq_bitslip_we <= interface2_bank_bus_re;
+    k7ddrphy_rdly_dq_bitslip_rst_we <= 1'd0;
+    if ((csrbank2_sel & (interface2_bank_bus_adr[8:0] == 4'd9))) begin
+        k7ddrphy_rdly_dq_bitslip_rst_we <= interface2_bank_bus_re;
     end
 end
+assign k7ddrphy_rdly_dq_bitslip_r = interface2_bank_bus_dat_w[0];
 always @(*) begin
     k7ddrphy_rdly_dq_bitslip_re <= 1'd0;
     if ((csrbank2_sel & (interface2_bank_bus_adr[8:0] == 4'd10))) begin
         k7ddrphy_rdly_dq_bitslip_re <= interface2_bank_bus_we;
     end
 end
-assign k7ddrphy_wdly_dq_rst_r = interface2_bank_bus_dat_w[0];
 always @(*) begin
-    k7ddrphy_wdly_dq_rst_we <= 1'd0;
-    if ((csrbank2_sel & (interface2_bank_bus_adr[8:0] == 4'd11))) begin
-        k7ddrphy_wdly_dq_rst_we <= interface2_bank_bus_re;
+    k7ddrphy_rdly_dq_bitslip_we <= 1'd0;
+    if ((csrbank2_sel & (interface2_bank_bus_adr[8:0] == 4'd10))) begin
+        k7ddrphy_rdly_dq_bitslip_we <= interface2_bank_bus_re;
     end
 end
+assign k7ddrphy_wdly_dq_rst_r = interface2_bank_bus_dat_w[0];
 always @(*) begin
     k7ddrphy_wdly_dq_rst_re <= 1'd0;
     if ((csrbank2_sel & (interface2_bank_bus_adr[8:0] == 4'd11))) begin
         k7ddrphy_wdly_dq_rst_re <= interface2_bank_bus_we;
+    end
+end
+always @(*) begin
+    k7ddrphy_wdly_dq_rst_we <= 1'd0;
+    if ((csrbank2_sel & (interface2_bank_bus_adr[8:0] == 4'd11))) begin
+        k7ddrphy_wdly_dq_rst_we <= interface2_bank_bus_re;
     end
 end
 assign k7ddrphy_wdly_dq_inc_r = interface2_bank_bus_dat_w[0];
@@ -14505,41 +14465,41 @@ always @(*) begin
 end
 assign k7ddrphy_wdly_dqs_rst_r = interface2_bank_bus_dat_w[0];
 always @(*) begin
-    k7ddrphy_wdly_dqs_rst_re <= 1'd0;
-    if ((csrbank2_sel & (interface2_bank_bus_adr[8:0] == 4'd13))) begin
-        k7ddrphy_wdly_dqs_rst_re <= interface2_bank_bus_we;
-    end
-end
-always @(*) begin
     k7ddrphy_wdly_dqs_rst_we <= 1'd0;
     if ((csrbank2_sel & (interface2_bank_bus_adr[8:0] == 4'd13))) begin
         k7ddrphy_wdly_dqs_rst_we <= interface2_bank_bus_re;
     end
 end
-assign k7ddrphy_wdly_dqs_inc_r = interface2_bank_bus_dat_w[0];
 always @(*) begin
-    k7ddrphy_wdly_dqs_inc_re <= 1'd0;
-    if ((csrbank2_sel & (interface2_bank_bus_adr[8:0] == 4'd14))) begin
-        k7ddrphy_wdly_dqs_inc_re <= interface2_bank_bus_we;
+    k7ddrphy_wdly_dqs_rst_re <= 1'd0;
+    if ((csrbank2_sel & (interface2_bank_bus_adr[8:0] == 4'd13))) begin
+        k7ddrphy_wdly_dqs_rst_re <= interface2_bank_bus_we;
     end
 end
+assign k7ddrphy_wdly_dqs_inc_r = interface2_bank_bus_dat_w[0];
 always @(*) begin
     k7ddrphy_wdly_dqs_inc_we <= 1'd0;
     if ((csrbank2_sel & (interface2_bank_bus_adr[8:0] == 4'd14))) begin
         k7ddrphy_wdly_dqs_inc_we <= interface2_bank_bus_re;
     end
 end
-assign k7ddrphy_wdly_dq_bitslip_rst_r = interface2_bank_bus_dat_w[0];
 always @(*) begin
-    k7ddrphy_wdly_dq_bitslip_rst_re <= 1'd0;
-    if ((csrbank2_sel & (interface2_bank_bus_adr[8:0] == 4'd15))) begin
-        k7ddrphy_wdly_dq_bitslip_rst_re <= interface2_bank_bus_we;
+    k7ddrphy_wdly_dqs_inc_re <= 1'd0;
+    if ((csrbank2_sel & (interface2_bank_bus_adr[8:0] == 4'd14))) begin
+        k7ddrphy_wdly_dqs_inc_re <= interface2_bank_bus_we;
     end
 end
+assign k7ddrphy_wdly_dq_bitslip_rst_r = interface2_bank_bus_dat_w[0];
 always @(*) begin
     k7ddrphy_wdly_dq_bitslip_rst_we <= 1'd0;
     if ((csrbank2_sel & (interface2_bank_bus_adr[8:0] == 4'd15))) begin
         k7ddrphy_wdly_dq_bitslip_rst_we <= interface2_bank_bus_re;
+    end
+end
+always @(*) begin
+    k7ddrphy_wdly_dq_bitslip_rst_re <= 1'd0;
+    if ((csrbank2_sel & (interface2_bank_bus_adr[8:0] == 4'd15))) begin
+        k7ddrphy_wdly_dq_bitslip_rst_re <= interface2_bank_bus_we;
     end
 end
 assign k7ddrphy_wdly_dq_bitslip_r = interface2_bank_bus_dat_w[0];
@@ -14570,15 +14530,15 @@ always @(*) begin
 end
 assign csrbank2_wrphase0_r = interface2_bank_bus_dat_w[1:0];
 always @(*) begin
-    csrbank2_wrphase0_re <= 1'd0;
-    if ((csrbank2_sel & (interface2_bank_bus_adr[8:0] == 5'd18))) begin
-        csrbank2_wrphase0_re <= interface2_bank_bus_we;
-    end
-end
-always @(*) begin
     csrbank2_wrphase0_we <= 1'd0;
     if ((csrbank2_sel & (interface2_bank_bus_adr[8:0] == 5'd18))) begin
         csrbank2_wrphase0_we <= interface2_bank_bus_re;
+    end
+end
+always @(*) begin
+    csrbank2_wrphase0_re <= 1'd0;
+    if ((csrbank2_sel & (interface2_bank_bus_adr[8:0] == 5'd18))) begin
+        csrbank2_wrphase0_re <= interface2_bank_bus_we;
     end
 end
 assign csrbank2_rst0_w = k7ddrphy_rst_storage;
@@ -14590,15 +14550,15 @@ assign csrbank2_wrphase0_w = k7ddrphy_wrphase_storage;
 assign csrbank3_sel = (interface3_bank_bus_adr[13:9] == 2'd3);
 assign csrbank3_dfii_control0_r = interface3_bank_bus_dat_w[3:0];
 always @(*) begin
-    csrbank3_dfii_control0_re <= 1'd0;
-    if ((csrbank3_sel & (interface3_bank_bus_adr[8:0] == 1'd0))) begin
-        csrbank3_dfii_control0_re <= interface3_bank_bus_we;
-    end
-end
-always @(*) begin
     csrbank3_dfii_control0_we <= 1'd0;
     if ((csrbank3_sel & (interface3_bank_bus_adr[8:0] == 1'd0))) begin
         csrbank3_dfii_control0_we <= interface3_bank_bus_re;
+    end
+end
+always @(*) begin
+    csrbank3_dfii_control0_re <= 1'd0;
+    if ((csrbank3_sel & (interface3_bank_bus_adr[8:0] == 1'd0))) begin
+        csrbank3_dfii_control0_re <= interface3_bank_bus_we;
     end
 end
 assign csrbank3_dfii_pi0_command0_r = interface3_bank_bus_dat_w[7:0];
@@ -14616,54 +14576,54 @@ always @(*) begin
 end
 assign litedramcore_sdram_phaseinjector0_command_issue_r = interface3_bank_bus_dat_w[0];
 always @(*) begin
-    litedramcore_sdram_phaseinjector0_command_issue_re <= 1'd0;
-    if ((csrbank3_sel & (interface3_bank_bus_adr[8:0] == 2'd2))) begin
-        litedramcore_sdram_phaseinjector0_command_issue_re <= interface3_bank_bus_we;
-    end
-end
-always @(*) begin
     litedramcore_sdram_phaseinjector0_command_issue_we <= 1'd0;
     if ((csrbank3_sel & (interface3_bank_bus_adr[8:0] == 2'd2))) begin
         litedramcore_sdram_phaseinjector0_command_issue_we <= interface3_bank_bus_re;
     end
 end
-assign csrbank3_dfii_pi0_address0_r = interface3_bank_bus_dat_w[14:0];
 always @(*) begin
-    csrbank3_dfii_pi0_address0_we <= 1'd0;
-    if ((csrbank3_sel & (interface3_bank_bus_adr[8:0] == 2'd3))) begin
-        csrbank3_dfii_pi0_address0_we <= interface3_bank_bus_re;
+    litedramcore_sdram_phaseinjector0_command_issue_re <= 1'd0;
+    if ((csrbank3_sel & (interface3_bank_bus_adr[8:0] == 2'd2))) begin
+        litedramcore_sdram_phaseinjector0_command_issue_re <= interface3_bank_bus_we;
     end
 end
+assign csrbank3_dfii_pi0_address0_r = interface3_bank_bus_dat_w[14:0];
 always @(*) begin
     csrbank3_dfii_pi0_address0_re <= 1'd0;
     if ((csrbank3_sel & (interface3_bank_bus_adr[8:0] == 2'd3))) begin
         csrbank3_dfii_pi0_address0_re <= interface3_bank_bus_we;
     end
 end
-assign csrbank3_dfii_pi0_baddress0_r = interface3_bank_bus_dat_w[2:0];
 always @(*) begin
-    csrbank3_dfii_pi0_baddress0_re <= 1'd0;
-    if ((csrbank3_sel & (interface3_bank_bus_adr[8:0] == 3'd4))) begin
-        csrbank3_dfii_pi0_baddress0_re <= interface3_bank_bus_we;
+    csrbank3_dfii_pi0_address0_we <= 1'd0;
+    if ((csrbank3_sel & (interface3_bank_bus_adr[8:0] == 2'd3))) begin
+        csrbank3_dfii_pi0_address0_we <= interface3_bank_bus_re;
     end
 end
+assign csrbank3_dfii_pi0_baddress0_r = interface3_bank_bus_dat_w[2:0];
 always @(*) begin
     csrbank3_dfii_pi0_baddress0_we <= 1'd0;
     if ((csrbank3_sel & (interface3_bank_bus_adr[8:0] == 3'd4))) begin
         csrbank3_dfii_pi0_baddress0_we <= interface3_bank_bus_re;
     end
 end
-assign csrbank3_dfii_pi0_wrdata1_r = interface3_bank_bus_dat_w;
 always @(*) begin
-    csrbank3_dfii_pi0_wrdata1_we <= 1'd0;
-    if ((csrbank3_sel & (interface3_bank_bus_adr[8:0] == 3'd5))) begin
-        csrbank3_dfii_pi0_wrdata1_we <= interface3_bank_bus_re;
+    csrbank3_dfii_pi0_baddress0_re <= 1'd0;
+    if ((csrbank3_sel & (interface3_bank_bus_adr[8:0] == 3'd4))) begin
+        csrbank3_dfii_pi0_baddress0_re <= interface3_bank_bus_we;
     end
 end
+assign csrbank3_dfii_pi0_wrdata1_r = interface3_bank_bus_dat_w;
 always @(*) begin
     csrbank3_dfii_pi0_wrdata1_re <= 1'd0;
     if ((csrbank3_sel & (interface3_bank_bus_adr[8:0] == 3'd5))) begin
         csrbank3_dfii_pi0_wrdata1_re <= interface3_bank_bus_we;
+    end
+end
+always @(*) begin
+    csrbank3_dfii_pi0_wrdata1_we <= 1'd0;
+    if ((csrbank3_sel & (interface3_bank_bus_adr[8:0] == 3'd5))) begin
+        csrbank3_dfii_pi0_wrdata1_we <= interface3_bank_bus_re;
     end
 end
 assign csrbank3_dfii_pi0_wrdata0_r = interface3_bank_bus_dat_w;
@@ -14681,80 +14641,80 @@ always @(*) begin
 end
 assign csrbank3_dfii_pi0_rddata1_r = interface3_bank_bus_dat_w;
 always @(*) begin
-    csrbank3_dfii_pi0_rddata1_re <= 1'd0;
-    if ((csrbank3_sel & (interface3_bank_bus_adr[8:0] == 3'd7))) begin
-        csrbank3_dfii_pi0_rddata1_re <= interface3_bank_bus_we;
-    end
-end
-always @(*) begin
     csrbank3_dfii_pi0_rddata1_we <= 1'd0;
     if ((csrbank3_sel & (interface3_bank_bus_adr[8:0] == 3'd7))) begin
         csrbank3_dfii_pi0_rddata1_we <= interface3_bank_bus_re;
     end
 end
-assign csrbank3_dfii_pi0_rddata0_r = interface3_bank_bus_dat_w;
 always @(*) begin
-    csrbank3_dfii_pi0_rddata0_we <= 1'd0;
-    if ((csrbank3_sel & (interface3_bank_bus_adr[8:0] == 4'd8))) begin
-        csrbank3_dfii_pi0_rddata0_we <= interface3_bank_bus_re;
+    csrbank3_dfii_pi0_rddata1_re <= 1'd0;
+    if ((csrbank3_sel & (interface3_bank_bus_adr[8:0] == 3'd7))) begin
+        csrbank3_dfii_pi0_rddata1_re <= interface3_bank_bus_we;
     end
 end
+assign csrbank3_dfii_pi0_rddata0_r = interface3_bank_bus_dat_w;
 always @(*) begin
     csrbank3_dfii_pi0_rddata0_re <= 1'd0;
     if ((csrbank3_sel & (interface3_bank_bus_adr[8:0] == 4'd8))) begin
         csrbank3_dfii_pi0_rddata0_re <= interface3_bank_bus_we;
     end
 end
-assign csrbank3_dfii_pi1_command0_r = interface3_bank_bus_dat_w[7:0];
 always @(*) begin
-    csrbank3_dfii_pi1_command0_we <= 1'd0;
-    if ((csrbank3_sel & (interface3_bank_bus_adr[8:0] == 4'd9))) begin
-        csrbank3_dfii_pi1_command0_we <= interface3_bank_bus_re;
+    csrbank3_dfii_pi0_rddata0_we <= 1'd0;
+    if ((csrbank3_sel & (interface3_bank_bus_adr[8:0] == 4'd8))) begin
+        csrbank3_dfii_pi0_rddata0_we <= interface3_bank_bus_re;
     end
 end
+assign csrbank3_dfii_pi1_command0_r = interface3_bank_bus_dat_w[7:0];
 always @(*) begin
     csrbank3_dfii_pi1_command0_re <= 1'd0;
     if ((csrbank3_sel & (interface3_bank_bus_adr[8:0] == 4'd9))) begin
         csrbank3_dfii_pi1_command0_re <= interface3_bank_bus_we;
     end
 end
-assign litedramcore_sdram_phaseinjector1_command_issue_r = interface3_bank_bus_dat_w[0];
 always @(*) begin
-    litedramcore_sdram_phaseinjector1_command_issue_we <= 1'd0;
-    if ((csrbank3_sel & (interface3_bank_bus_adr[8:0] == 4'd10))) begin
-        litedramcore_sdram_phaseinjector1_command_issue_we <= interface3_bank_bus_re;
+    csrbank3_dfii_pi1_command0_we <= 1'd0;
+    if ((csrbank3_sel & (interface3_bank_bus_adr[8:0] == 4'd9))) begin
+        csrbank3_dfii_pi1_command0_we <= interface3_bank_bus_re;
     end
 end
+assign litedramcore_sdram_phaseinjector1_command_issue_r = interface3_bank_bus_dat_w[0];
 always @(*) begin
     litedramcore_sdram_phaseinjector1_command_issue_re <= 1'd0;
     if ((csrbank3_sel & (interface3_bank_bus_adr[8:0] == 4'd10))) begin
         litedramcore_sdram_phaseinjector1_command_issue_re <= interface3_bank_bus_we;
     end
 end
-assign csrbank3_dfii_pi1_address0_r = interface3_bank_bus_dat_w[14:0];
 always @(*) begin
-    csrbank3_dfii_pi1_address0_re <= 1'd0;
-    if ((csrbank3_sel & (interface3_bank_bus_adr[8:0] == 4'd11))) begin
-        csrbank3_dfii_pi1_address0_re <= interface3_bank_bus_we;
+    litedramcore_sdram_phaseinjector1_command_issue_we <= 1'd0;
+    if ((csrbank3_sel & (interface3_bank_bus_adr[8:0] == 4'd10))) begin
+        litedramcore_sdram_phaseinjector1_command_issue_we <= interface3_bank_bus_re;
     end
 end
+assign csrbank3_dfii_pi1_address0_r = interface3_bank_bus_dat_w[14:0];
 always @(*) begin
     csrbank3_dfii_pi1_address0_we <= 1'd0;
     if ((csrbank3_sel & (interface3_bank_bus_adr[8:0] == 4'd11))) begin
         csrbank3_dfii_pi1_address0_we <= interface3_bank_bus_re;
     end
 end
-assign csrbank3_dfii_pi1_baddress0_r = interface3_bank_bus_dat_w[2:0];
 always @(*) begin
-    csrbank3_dfii_pi1_baddress0_we <= 1'd0;
-    if ((csrbank3_sel & (interface3_bank_bus_adr[8:0] == 4'd12))) begin
-        csrbank3_dfii_pi1_baddress0_we <= interface3_bank_bus_re;
+    csrbank3_dfii_pi1_address0_re <= 1'd0;
+    if ((csrbank3_sel & (interface3_bank_bus_adr[8:0] == 4'd11))) begin
+        csrbank3_dfii_pi1_address0_re <= interface3_bank_bus_we;
     end
 end
+assign csrbank3_dfii_pi1_baddress0_r = interface3_bank_bus_dat_w[2:0];
 always @(*) begin
     csrbank3_dfii_pi1_baddress0_re <= 1'd0;
     if ((csrbank3_sel & (interface3_bank_bus_adr[8:0] == 4'd12))) begin
         csrbank3_dfii_pi1_baddress0_re <= interface3_bank_bus_we;
+    end
+end
+always @(*) begin
+    csrbank3_dfii_pi1_baddress0_we <= 1'd0;
+    if ((csrbank3_sel & (interface3_bank_bus_adr[8:0] == 4'd12))) begin
+        csrbank3_dfii_pi1_baddress0_we <= interface3_bank_bus_re;
     end
 end
 assign csrbank3_dfii_pi1_wrdata1_r = interface3_bank_bus_dat_w;
@@ -14772,28 +14732,28 @@ always @(*) begin
 end
 assign csrbank3_dfii_pi1_wrdata0_r = interface3_bank_bus_dat_w;
 always @(*) begin
-    csrbank3_dfii_pi1_wrdata0_re <= 1'd0;
-    if ((csrbank3_sel & (interface3_bank_bus_adr[8:0] == 4'd14))) begin
-        csrbank3_dfii_pi1_wrdata0_re <= interface3_bank_bus_we;
-    end
-end
-always @(*) begin
     csrbank3_dfii_pi1_wrdata0_we <= 1'd0;
     if ((csrbank3_sel & (interface3_bank_bus_adr[8:0] == 4'd14))) begin
         csrbank3_dfii_pi1_wrdata0_we <= interface3_bank_bus_re;
     end
 end
-assign csrbank3_dfii_pi1_rddata1_r = interface3_bank_bus_dat_w;
 always @(*) begin
-    csrbank3_dfii_pi1_rddata1_we <= 1'd0;
-    if ((csrbank3_sel & (interface3_bank_bus_adr[8:0] == 4'd15))) begin
-        csrbank3_dfii_pi1_rddata1_we <= interface3_bank_bus_re;
+    csrbank3_dfii_pi1_wrdata0_re <= 1'd0;
+    if ((csrbank3_sel & (interface3_bank_bus_adr[8:0] == 4'd14))) begin
+        csrbank3_dfii_pi1_wrdata0_re <= interface3_bank_bus_we;
     end
 end
+assign csrbank3_dfii_pi1_rddata1_r = interface3_bank_bus_dat_w;
 always @(*) begin
     csrbank3_dfii_pi1_rddata1_re <= 1'd0;
     if ((csrbank3_sel & (interface3_bank_bus_adr[8:0] == 4'd15))) begin
         csrbank3_dfii_pi1_rddata1_re <= interface3_bank_bus_we;
+    end
+end
+always @(*) begin
+    csrbank3_dfii_pi1_rddata1_we <= 1'd0;
+    if ((csrbank3_sel & (interface3_bank_bus_adr[8:0] == 4'd15))) begin
+        csrbank3_dfii_pi1_rddata1_we <= interface3_bank_bus_re;
     end
 end
 assign csrbank3_dfii_pi1_rddata0_r = interface3_bank_bus_dat_w;
@@ -14811,15 +14771,15 @@ always @(*) begin
 end
 assign csrbank3_dfii_pi2_command0_r = interface3_bank_bus_dat_w[7:0];
 always @(*) begin
-    csrbank3_dfii_pi2_command0_re <= 1'd0;
-    if ((csrbank3_sel & (interface3_bank_bus_adr[8:0] == 5'd17))) begin
-        csrbank3_dfii_pi2_command0_re <= interface3_bank_bus_we;
-    end
-end
-always @(*) begin
     csrbank3_dfii_pi2_command0_we <= 1'd0;
     if ((csrbank3_sel & (interface3_bank_bus_adr[8:0] == 5'd17))) begin
         csrbank3_dfii_pi2_command0_we <= interface3_bank_bus_re;
+    end
+end
+always @(*) begin
+    csrbank3_dfii_pi2_command0_re <= 1'd0;
+    if ((csrbank3_sel & (interface3_bank_bus_adr[8:0] == 5'd17))) begin
+        csrbank3_dfii_pi2_command0_re <= interface3_bank_bus_we;
     end
 end
 assign litedramcore_sdram_phaseinjector2_command_issue_r = interface3_bank_bus_dat_w[0];
@@ -14837,15 +14797,15 @@ always @(*) begin
 end
 assign csrbank3_dfii_pi2_address0_r = interface3_bank_bus_dat_w[14:0];
 always @(*) begin
-    csrbank3_dfii_pi2_address0_we <= 1'd0;
-    if ((csrbank3_sel & (interface3_bank_bus_adr[8:0] == 5'd19))) begin
-        csrbank3_dfii_pi2_address0_we <= interface3_bank_bus_re;
-    end
-end
-always @(*) begin
     csrbank3_dfii_pi2_address0_re <= 1'd0;
     if ((csrbank3_sel & (interface3_bank_bus_adr[8:0] == 5'd19))) begin
         csrbank3_dfii_pi2_address0_re <= interface3_bank_bus_we;
+    end
+end
+always @(*) begin
+    csrbank3_dfii_pi2_address0_we <= 1'd0;
+    if ((csrbank3_sel & (interface3_bank_bus_adr[8:0] == 5'd19))) begin
+        csrbank3_dfii_pi2_address0_we <= interface3_bank_bus_re;
     end
 end
 assign csrbank3_dfii_pi2_baddress0_r = interface3_bank_bus_dat_w[2:0];
@@ -14863,80 +14823,80 @@ always @(*) begin
 end
 assign csrbank3_dfii_pi2_wrdata1_r = interface3_bank_bus_dat_w;
 always @(*) begin
-    csrbank3_dfii_pi2_wrdata1_re <= 1'd0;
-    if ((csrbank3_sel & (interface3_bank_bus_adr[8:0] == 5'd21))) begin
-        csrbank3_dfii_pi2_wrdata1_re <= interface3_bank_bus_we;
-    end
-end
-always @(*) begin
     csrbank3_dfii_pi2_wrdata1_we <= 1'd0;
     if ((csrbank3_sel & (interface3_bank_bus_adr[8:0] == 5'd21))) begin
         csrbank3_dfii_pi2_wrdata1_we <= interface3_bank_bus_re;
     end
 end
-assign csrbank3_dfii_pi2_wrdata0_r = interface3_bank_bus_dat_w;
 always @(*) begin
-    csrbank3_dfii_pi2_wrdata0_we <= 1'd0;
-    if ((csrbank3_sel & (interface3_bank_bus_adr[8:0] == 5'd22))) begin
-        csrbank3_dfii_pi2_wrdata0_we <= interface3_bank_bus_re;
+    csrbank3_dfii_pi2_wrdata1_re <= 1'd0;
+    if ((csrbank3_sel & (interface3_bank_bus_adr[8:0] == 5'd21))) begin
+        csrbank3_dfii_pi2_wrdata1_re <= interface3_bank_bus_we;
     end
 end
+assign csrbank3_dfii_pi2_wrdata0_r = interface3_bank_bus_dat_w;
 always @(*) begin
     csrbank3_dfii_pi2_wrdata0_re <= 1'd0;
     if ((csrbank3_sel & (interface3_bank_bus_adr[8:0] == 5'd22))) begin
         csrbank3_dfii_pi2_wrdata0_re <= interface3_bank_bus_we;
     end
 end
-assign csrbank3_dfii_pi2_rddata1_r = interface3_bank_bus_dat_w;
 always @(*) begin
-    csrbank3_dfii_pi2_rddata1_re <= 1'd0;
-    if ((csrbank3_sel & (interface3_bank_bus_adr[8:0] == 5'd23))) begin
-        csrbank3_dfii_pi2_rddata1_re <= interface3_bank_bus_we;
+    csrbank3_dfii_pi2_wrdata0_we <= 1'd0;
+    if ((csrbank3_sel & (interface3_bank_bus_adr[8:0] == 5'd22))) begin
+        csrbank3_dfii_pi2_wrdata0_we <= interface3_bank_bus_re;
     end
 end
+assign csrbank3_dfii_pi2_rddata1_r = interface3_bank_bus_dat_w;
 always @(*) begin
     csrbank3_dfii_pi2_rddata1_we <= 1'd0;
     if ((csrbank3_sel & (interface3_bank_bus_adr[8:0] == 5'd23))) begin
         csrbank3_dfii_pi2_rddata1_we <= interface3_bank_bus_re;
     end
 end
-assign csrbank3_dfii_pi2_rddata0_r = interface3_bank_bus_dat_w;
 always @(*) begin
-    csrbank3_dfii_pi2_rddata0_re <= 1'd0;
-    if ((csrbank3_sel & (interface3_bank_bus_adr[8:0] == 5'd24))) begin
-        csrbank3_dfii_pi2_rddata0_re <= interface3_bank_bus_we;
+    csrbank3_dfii_pi2_rddata1_re <= 1'd0;
+    if ((csrbank3_sel & (interface3_bank_bus_adr[8:0] == 5'd23))) begin
+        csrbank3_dfii_pi2_rddata1_re <= interface3_bank_bus_we;
     end
 end
+assign csrbank3_dfii_pi2_rddata0_r = interface3_bank_bus_dat_w;
 always @(*) begin
     csrbank3_dfii_pi2_rddata0_we <= 1'd0;
     if ((csrbank3_sel & (interface3_bank_bus_adr[8:0] == 5'd24))) begin
         csrbank3_dfii_pi2_rddata0_we <= interface3_bank_bus_re;
     end
 end
-assign csrbank3_dfii_pi3_command0_r = interface3_bank_bus_dat_w[7:0];
 always @(*) begin
-    csrbank3_dfii_pi3_command0_we <= 1'd0;
-    if ((csrbank3_sel & (interface3_bank_bus_adr[8:0] == 5'd25))) begin
-        csrbank3_dfii_pi3_command0_we <= interface3_bank_bus_re;
+    csrbank3_dfii_pi2_rddata0_re <= 1'd0;
+    if ((csrbank3_sel & (interface3_bank_bus_adr[8:0] == 5'd24))) begin
+        csrbank3_dfii_pi2_rddata0_re <= interface3_bank_bus_we;
     end
 end
+assign csrbank3_dfii_pi3_command0_r = interface3_bank_bus_dat_w[7:0];
 always @(*) begin
     csrbank3_dfii_pi3_command0_re <= 1'd0;
     if ((csrbank3_sel & (interface3_bank_bus_adr[8:0] == 5'd25))) begin
         csrbank3_dfii_pi3_command0_re <= interface3_bank_bus_we;
     end
 end
-assign litedramcore_sdram_phaseinjector3_command_issue_r = interface3_bank_bus_dat_w[0];
 always @(*) begin
-    litedramcore_sdram_phaseinjector3_command_issue_re <= 1'd0;
-    if ((csrbank3_sel & (interface3_bank_bus_adr[8:0] == 5'd26))) begin
-        litedramcore_sdram_phaseinjector3_command_issue_re <= interface3_bank_bus_we;
+    csrbank3_dfii_pi3_command0_we <= 1'd0;
+    if ((csrbank3_sel & (interface3_bank_bus_adr[8:0] == 5'd25))) begin
+        csrbank3_dfii_pi3_command0_we <= interface3_bank_bus_re;
     end
 end
+assign litedramcore_sdram_phaseinjector3_command_issue_r = interface3_bank_bus_dat_w[0];
 always @(*) begin
     litedramcore_sdram_phaseinjector3_command_issue_we <= 1'd0;
     if ((csrbank3_sel & (interface3_bank_bus_adr[8:0] == 5'd26))) begin
         litedramcore_sdram_phaseinjector3_command_issue_we <= interface3_bank_bus_re;
+    end
+end
+always @(*) begin
+    litedramcore_sdram_phaseinjector3_command_issue_re <= 1'd0;
+    if ((csrbank3_sel & (interface3_bank_bus_adr[8:0] == 5'd26))) begin
+        litedramcore_sdram_phaseinjector3_command_issue_re <= interface3_bank_bus_we;
     end
 end
 assign csrbank3_dfii_pi3_address0_r = interface3_bank_bus_dat_w[14:0];
@@ -14954,41 +14914,41 @@ always @(*) begin
 end
 assign csrbank3_dfii_pi3_baddress0_r = interface3_bank_bus_dat_w[2:0];
 always @(*) begin
-    csrbank3_dfii_pi3_baddress0_re <= 1'd0;
-    if ((csrbank3_sel & (interface3_bank_bus_adr[8:0] == 5'd28))) begin
-        csrbank3_dfii_pi3_baddress0_re <= interface3_bank_bus_we;
-    end
-end
-always @(*) begin
     csrbank3_dfii_pi3_baddress0_we <= 1'd0;
     if ((csrbank3_sel & (interface3_bank_bus_adr[8:0] == 5'd28))) begin
         csrbank3_dfii_pi3_baddress0_we <= interface3_bank_bus_re;
     end
 end
-assign csrbank3_dfii_pi3_wrdata1_r = interface3_bank_bus_dat_w;
 always @(*) begin
-    csrbank3_dfii_pi3_wrdata1_we <= 1'd0;
-    if ((csrbank3_sel & (interface3_bank_bus_adr[8:0] == 5'd29))) begin
-        csrbank3_dfii_pi3_wrdata1_we <= interface3_bank_bus_re;
+    csrbank3_dfii_pi3_baddress0_re <= 1'd0;
+    if ((csrbank3_sel & (interface3_bank_bus_adr[8:0] == 5'd28))) begin
+        csrbank3_dfii_pi3_baddress0_re <= interface3_bank_bus_we;
     end
 end
+assign csrbank3_dfii_pi3_wrdata1_r = interface3_bank_bus_dat_w;
 always @(*) begin
     csrbank3_dfii_pi3_wrdata1_re <= 1'd0;
     if ((csrbank3_sel & (interface3_bank_bus_adr[8:0] == 5'd29))) begin
         csrbank3_dfii_pi3_wrdata1_re <= interface3_bank_bus_we;
     end
 end
-assign csrbank3_dfii_pi3_wrdata0_r = interface3_bank_bus_dat_w;
 always @(*) begin
-    csrbank3_dfii_pi3_wrdata0_re <= 1'd0;
-    if ((csrbank3_sel & (interface3_bank_bus_adr[8:0] == 5'd30))) begin
-        csrbank3_dfii_pi3_wrdata0_re <= interface3_bank_bus_we;
+    csrbank3_dfii_pi3_wrdata1_we <= 1'd0;
+    if ((csrbank3_sel & (interface3_bank_bus_adr[8:0] == 5'd29))) begin
+        csrbank3_dfii_pi3_wrdata1_we <= interface3_bank_bus_re;
     end
 end
+assign csrbank3_dfii_pi3_wrdata0_r = interface3_bank_bus_dat_w;
 always @(*) begin
     csrbank3_dfii_pi3_wrdata0_we <= 1'd0;
     if ((csrbank3_sel & (interface3_bank_bus_adr[8:0] == 5'd30))) begin
         csrbank3_dfii_pi3_wrdata0_we <= interface3_bank_bus_re;
+    end
+end
+always @(*) begin
+    csrbank3_dfii_pi3_wrdata0_re <= 1'd0;
+    if ((csrbank3_sel & (interface3_bank_bus_adr[8:0] == 5'd30))) begin
+        csrbank3_dfii_pi3_wrdata0_re <= interface3_bank_bus_we;
     end
 end
 assign csrbank3_dfii_pi3_rddata1_r = interface3_bank_bus_dat_w;
@@ -15006,15 +14966,15 @@ always @(*) begin
 end
 assign csrbank3_dfii_pi3_rddata0_r = interface3_bank_bus_dat_w;
 always @(*) begin
-    csrbank3_dfii_pi3_rddata0_we <= 1'd0;
-    if ((csrbank3_sel & (interface3_bank_bus_adr[8:0] == 6'd32))) begin
-        csrbank3_dfii_pi3_rddata0_we <= interface3_bank_bus_re;
-    end
-end
-always @(*) begin
     csrbank3_dfii_pi3_rddata0_re <= 1'd0;
     if ((csrbank3_sel & (interface3_bank_bus_adr[8:0] == 6'd32))) begin
         csrbank3_dfii_pi3_rddata0_re <= interface3_bank_bus_we;
+    end
+end
+always @(*) begin
+    csrbank3_dfii_pi3_rddata0_we <= 1'd0;
+    if ((csrbank3_sel & (interface3_bank_bus_adr[8:0] == 6'd32))) begin
+        csrbank3_dfii_pi3_rddata0_we <= interface3_bank_bus_re;
     end
 end
 assign litedramcore_sdram_sel = litedramcore_sdram_storage[0];
@@ -15089,41 +15049,41 @@ assign litedramcore_sdram_phaseinjector3_rddata_we = csrbank3_dfii_pi3_rddata0_w
 assign csrbank4_sel = (interface4_bank_bus_adr[13:9] == 3'd4);
 assign csrbank4_load0_r = interface4_bank_bus_dat_w;
 always @(*) begin
-    csrbank4_load0_we <= 1'd0;
-    if ((csrbank4_sel & (interface4_bank_bus_adr[8:0] == 1'd0))) begin
-        csrbank4_load0_we <= interface4_bank_bus_re;
-    end
-end
-always @(*) begin
     csrbank4_load0_re <= 1'd0;
     if ((csrbank4_sel & (interface4_bank_bus_adr[8:0] == 1'd0))) begin
         csrbank4_load0_re <= interface4_bank_bus_we;
     end
 end
-assign csrbank4_reload0_r = interface4_bank_bus_dat_w;
 always @(*) begin
-    csrbank4_reload0_re <= 1'd0;
-    if ((csrbank4_sel & (interface4_bank_bus_adr[8:0] == 1'd1))) begin
-        csrbank4_reload0_re <= interface4_bank_bus_we;
+    csrbank4_load0_we <= 1'd0;
+    if ((csrbank4_sel & (interface4_bank_bus_adr[8:0] == 1'd0))) begin
+        csrbank4_load0_we <= interface4_bank_bus_re;
     end
 end
+assign csrbank4_reload0_r = interface4_bank_bus_dat_w;
 always @(*) begin
     csrbank4_reload0_we <= 1'd0;
     if ((csrbank4_sel & (interface4_bank_bus_adr[8:0] == 1'd1))) begin
         csrbank4_reload0_we <= interface4_bank_bus_re;
     end
 end
-assign csrbank4_en0_r = interface4_bank_bus_dat_w[0];
 always @(*) begin
-    csrbank4_en0_we <= 1'd0;
-    if ((csrbank4_sel & (interface4_bank_bus_adr[8:0] == 2'd2))) begin
-        csrbank4_en0_we <= interface4_bank_bus_re;
+    csrbank4_reload0_re <= 1'd0;
+    if ((csrbank4_sel & (interface4_bank_bus_adr[8:0] == 1'd1))) begin
+        csrbank4_reload0_re <= interface4_bank_bus_we;
     end
 end
+assign csrbank4_en0_r = interface4_bank_bus_dat_w[0];
 always @(*) begin
     csrbank4_en0_re <= 1'd0;
     if ((csrbank4_sel & (interface4_bank_bus_adr[8:0] == 2'd2))) begin
         csrbank4_en0_re <= interface4_bank_bus_we;
+    end
+end
+always @(*) begin
+    csrbank4_en0_we <= 1'd0;
+    if ((csrbank4_sel & (interface4_bank_bus_adr[8:0] == 2'd2))) begin
+        csrbank4_en0_we <= interface4_bank_bus_re;
     end
 end
 assign csrbank4_update_value0_r = interface4_bank_bus_dat_w[0];
@@ -15141,54 +15101,54 @@ always @(*) begin
 end
 assign csrbank4_value_r = interface4_bank_bus_dat_w;
 always @(*) begin
-    csrbank4_value_re <= 1'd0;
-    if ((csrbank4_sel & (interface4_bank_bus_adr[8:0] == 3'd4))) begin
-        csrbank4_value_re <= interface4_bank_bus_we;
-    end
-end
-always @(*) begin
     csrbank4_value_we <= 1'd0;
     if ((csrbank4_sel & (interface4_bank_bus_adr[8:0] == 3'd4))) begin
         csrbank4_value_we <= interface4_bank_bus_re;
     end
 end
-assign csrbank4_ev_status_r = interface4_bank_bus_dat_w[0];
 always @(*) begin
-    csrbank4_ev_status_we <= 1'd0;
-    if ((csrbank4_sel & (interface4_bank_bus_adr[8:0] == 3'd5))) begin
-        csrbank4_ev_status_we <= interface4_bank_bus_re;
+    csrbank4_value_re <= 1'd0;
+    if ((csrbank4_sel & (interface4_bank_bus_adr[8:0] == 3'd4))) begin
+        csrbank4_value_re <= interface4_bank_bus_we;
     end
 end
+assign csrbank4_ev_status_r = interface4_bank_bus_dat_w[0];
 always @(*) begin
     csrbank4_ev_status_re <= 1'd0;
     if ((csrbank4_sel & (interface4_bank_bus_adr[8:0] == 3'd5))) begin
         csrbank4_ev_status_re <= interface4_bank_bus_we;
     end
 end
-assign csrbank4_ev_pending_r = interface4_bank_bus_dat_w[0];
 always @(*) begin
-    csrbank4_ev_pending_we <= 1'd0;
-    if ((csrbank4_sel & (interface4_bank_bus_adr[8:0] == 3'd6))) begin
-        csrbank4_ev_pending_we <= interface4_bank_bus_re;
+    csrbank4_ev_status_we <= 1'd0;
+    if ((csrbank4_sel & (interface4_bank_bus_adr[8:0] == 3'd5))) begin
+        csrbank4_ev_status_we <= interface4_bank_bus_re;
     end
 end
+assign csrbank4_ev_pending_r = interface4_bank_bus_dat_w[0];
 always @(*) begin
     csrbank4_ev_pending_re <= 1'd0;
     if ((csrbank4_sel & (interface4_bank_bus_adr[8:0] == 3'd6))) begin
         csrbank4_ev_pending_re <= interface4_bank_bus_we;
     end
 end
-assign csrbank4_ev_enable0_r = interface4_bank_bus_dat_w[0];
 always @(*) begin
-    csrbank4_ev_enable0_re <= 1'd0;
-    if ((csrbank4_sel & (interface4_bank_bus_adr[8:0] == 3'd7))) begin
-        csrbank4_ev_enable0_re <= interface4_bank_bus_we;
+    csrbank4_ev_pending_we <= 1'd0;
+    if ((csrbank4_sel & (interface4_bank_bus_adr[8:0] == 3'd6))) begin
+        csrbank4_ev_pending_we <= interface4_bank_bus_re;
     end
 end
+assign csrbank4_ev_enable0_r = interface4_bank_bus_dat_w[0];
 always @(*) begin
     csrbank4_ev_enable0_we <= 1'd0;
     if ((csrbank4_sel & (interface4_bank_bus_adr[8:0] == 3'd7))) begin
         csrbank4_ev_enable0_we <= interface4_bank_bus_re;
+    end
+end
+always @(*) begin
+    csrbank4_ev_enable0_re <= 1'd0;
+    if ((csrbank4_sel & (interface4_bank_bus_adr[8:0] == 3'd7))) begin
+        csrbank4_ev_enable0_re <= interface4_bank_bus_we;
     end
 end
 assign csrbank4_load0_w = litedramcore_load_storage;
@@ -15208,28 +15168,28 @@ assign csrbank4_ev_enable0_w = litedramcore_enable_storage;
 assign csrbank5_sel = (interface5_bank_bus_adr[13:9] == 3'd5);
 assign uart_rxtx_r = interface5_bank_bus_dat_w[7:0];
 always @(*) begin
-    uart_rxtx_we <= 1'd0;
-    if ((csrbank5_sel & (interface5_bank_bus_adr[8:0] == 1'd0))) begin
-        uart_rxtx_we <= interface5_bank_bus_re;
-    end
-end
-always @(*) begin
     uart_rxtx_re <= 1'd0;
     if ((csrbank5_sel & (interface5_bank_bus_adr[8:0] == 1'd0))) begin
         uart_rxtx_re <= interface5_bank_bus_we;
     end
 end
-assign csrbank5_txfull_r = interface5_bank_bus_dat_w[0];
 always @(*) begin
-    csrbank5_txfull_we <= 1'd0;
-    if ((csrbank5_sel & (interface5_bank_bus_adr[8:0] == 1'd1))) begin
-        csrbank5_txfull_we <= interface5_bank_bus_re;
+    uart_rxtx_we <= 1'd0;
+    if ((csrbank5_sel & (interface5_bank_bus_adr[8:0] == 1'd0))) begin
+        uart_rxtx_we <= interface5_bank_bus_re;
     end
 end
+assign csrbank5_txfull_r = interface5_bank_bus_dat_w[0];
 always @(*) begin
     csrbank5_txfull_re <= 1'd0;
     if ((csrbank5_sel & (interface5_bank_bus_adr[8:0] == 1'd1))) begin
         csrbank5_txfull_re <= interface5_bank_bus_we;
+    end
+end
+always @(*) begin
+    csrbank5_txfull_we <= 1'd0;
+    if ((csrbank5_sel & (interface5_bank_bus_adr[8:0] == 1'd1))) begin
+        csrbank5_txfull_we <= interface5_bank_bus_re;
     end
 end
 assign csrbank5_rxempty_r = interface5_bank_bus_dat_w[0];
@@ -15247,15 +15207,15 @@ always @(*) begin
 end
 assign csrbank5_ev_status_r = interface5_bank_bus_dat_w[1:0];
 always @(*) begin
-    csrbank5_ev_status_re <= 1'd0;
-    if ((csrbank5_sel & (interface5_bank_bus_adr[8:0] == 2'd3))) begin
-        csrbank5_ev_status_re <= interface5_bank_bus_we;
-    end
-end
-always @(*) begin
     csrbank5_ev_status_we <= 1'd0;
     if ((csrbank5_sel & (interface5_bank_bus_adr[8:0] == 2'd3))) begin
         csrbank5_ev_status_we <= interface5_bank_bus_re;
+    end
+end
+always @(*) begin
+    csrbank5_ev_status_re <= 1'd0;
+    if ((csrbank5_sel & (interface5_bank_bus_adr[8:0] == 2'd3))) begin
+        csrbank5_ev_status_re <= interface5_bank_bus_we;
     end
 end
 assign csrbank5_ev_pending_r = interface5_bank_bus_dat_w[1:0];
@@ -15273,28 +15233,28 @@ always @(*) begin
 end
 assign csrbank5_ev_enable0_r = interface5_bank_bus_dat_w[1:0];
 always @(*) begin
-    csrbank5_ev_enable0_we <= 1'd0;
-    if ((csrbank5_sel & (interface5_bank_bus_adr[8:0] == 3'd5))) begin
-        csrbank5_ev_enable0_we <= interface5_bank_bus_re;
-    end
-end
-always @(*) begin
     csrbank5_ev_enable0_re <= 1'd0;
     if ((csrbank5_sel & (interface5_bank_bus_adr[8:0] == 3'd5))) begin
         csrbank5_ev_enable0_re <= interface5_bank_bus_we;
     end
 end
-assign csrbank5_txempty_r = interface5_bank_bus_dat_w[0];
 always @(*) begin
-    csrbank5_txempty_re <= 1'd0;
-    if ((csrbank5_sel & (interface5_bank_bus_adr[8:0] == 3'd6))) begin
-        csrbank5_txempty_re <= interface5_bank_bus_we;
+    csrbank5_ev_enable0_we <= 1'd0;
+    if ((csrbank5_sel & (interface5_bank_bus_adr[8:0] == 3'd5))) begin
+        csrbank5_ev_enable0_we <= interface5_bank_bus_re;
     end
 end
+assign csrbank5_txempty_r = interface5_bank_bus_dat_w[0];
 always @(*) begin
     csrbank5_txempty_we <= 1'd0;
     if ((csrbank5_sel & (interface5_bank_bus_adr[8:0] == 3'd6))) begin
         csrbank5_txempty_we <= interface5_bank_bus_re;
+    end
+end
+always @(*) begin
+    csrbank5_txempty_re <= 1'd0;
+    if ((csrbank5_sel & (interface5_bank_bus_adr[8:0] == 3'd6))) begin
+        csrbank5_txempty_re <= interface5_bank_bus_we;
     end
 end
 assign csrbank5_rxfull_r = interface5_bank_bus_dat_w[0];
@@ -15369,10 +15329,10 @@ always @(*) begin
     rhs_self0 <= 30'd0;
     case (grant)
         1'd0: begin
-            rhs_self0 <= litedramcore_interface0_adapted_interface_adr;
+            rhs_self0 <= litedramcore_ibus_adr;
         end
         default: begin
-            rhs_self0 <= litedramcore_interface1_adapted_interface_adr;
+            rhs_self0 <= litedramcore_dbus_adr;
         end
     endcase
 end
@@ -15380,10 +15340,10 @@ always @(*) begin
     rhs_self1 <= 32'd0;
     case (grant)
         1'd0: begin
-            rhs_self1 <= litedramcore_interface0_adapted_interface_dat_w;
+            rhs_self1 <= litedramcore_ibus_dat_w;
         end
         default: begin
-            rhs_self1 <= litedramcore_interface1_adapted_interface_dat_w;
+            rhs_self1 <= litedramcore_dbus_dat_w;
         end
     endcase
 end
@@ -15391,10 +15351,10 @@ always @(*) begin
     rhs_self2 <= 4'd0;
     case (grant)
         1'd0: begin
-            rhs_self2 <= litedramcore_interface0_adapted_interface_sel;
+            rhs_self2 <= litedramcore_ibus_sel;
         end
         default: begin
-            rhs_self2 <= litedramcore_interface1_adapted_interface_sel;
+            rhs_self2 <= litedramcore_dbus_sel;
         end
     endcase
 end
@@ -15402,10 +15362,10 @@ always @(*) begin
     rhs_self3 <= 1'd0;
     case (grant)
         1'd0: begin
-            rhs_self3 <= litedramcore_interface0_adapted_interface_cyc;
+            rhs_self3 <= litedramcore_ibus_cyc;
         end
         default: begin
-            rhs_self3 <= litedramcore_interface1_adapted_interface_cyc;
+            rhs_self3 <= litedramcore_dbus_cyc;
         end
     endcase
 end
@@ -15413,10 +15373,10 @@ always @(*) begin
     rhs_self4 <= 1'd0;
     case (grant)
         1'd0: begin
-            rhs_self4 <= litedramcore_interface0_adapted_interface_stb;
+            rhs_self4 <= litedramcore_ibus_stb;
         end
         default: begin
-            rhs_self4 <= litedramcore_interface1_adapted_interface_stb;
+            rhs_self4 <= litedramcore_dbus_stb;
         end
     endcase
 end
@@ -15424,10 +15384,10 @@ always @(*) begin
     rhs_self5 <= 1'd0;
     case (grant)
         1'd0: begin
-            rhs_self5 <= litedramcore_interface0_adapted_interface_we;
+            rhs_self5 <= litedramcore_ibus_we;
         end
         default: begin
-            rhs_self5 <= litedramcore_interface1_adapted_interface_we;
+            rhs_self5 <= litedramcore_dbus_we;
         end
     endcase
 end
@@ -15435,10 +15395,10 @@ always @(*) begin
     rhs_self6 <= 3'd0;
     case (grant)
         1'd0: begin
-            rhs_self6 <= litedramcore_interface0_adapted_interface_cti;
+            rhs_self6 <= litedramcore_ibus_cti;
         end
         default: begin
-            rhs_self6 <= litedramcore_interface1_adapted_interface_cti;
+            rhs_self6 <= litedramcore_dbus_cti;
         end
     endcase
 end
@@ -15446,10 +15406,10 @@ always @(*) begin
     rhs_self7 <= 2'd0;
     case (grant)
         1'd0: begin
-            rhs_self7 <= litedramcore_interface0_adapted_interface_bte;
+            rhs_self7 <= litedramcore_ibus_bte;
         end
         default: begin
-            rhs_self7 <= litedramcore_interface1_adapted_interface_bte;
+            rhs_self7 <= litedramcore_dbus_bte;
         end
     endcase
 end
@@ -19688,10 +19648,10 @@ end
 //------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
-// Memory rom: 8529-words x 32-bit
+// Memory rom: 8481-words x 32-bit
 //------------------------------------------------------------------------------
 // Port 0 | Read: Sync  | Write: ---- | 
-reg [31:0] rom[0:8528];
+reg [31:0] rom[0:8480];
 initial begin
 	$readmemh("litedram_core_rom.init", rom);
 end
@@ -26121,29 +26081,40 @@ assign litedramcore_tag_port_dat_r = tag_mem[tag_mem_adr0];
 
 
 //------------------------------------------------------------------------------
-// Instance serv_rf_top of serv_rf_top Module.
+// Instance VexRiscv of VexRiscv Module.
 //------------------------------------------------------------------------------
-serv_rf_top #(
-	// Parameters.
-	.RESET_PC (1'd0)
-) serv_rf_top (
+VexRiscv VexRiscv(
 	// Inputs.
-	.clk         (sys_clk),
-	.i_dbus_ack  (litedramcore_dbus_ack),
-	.i_dbus_rdt  (litedramcore_dbus_dat_r),
-	.i_ibus_ack  (litedramcore_ibus_ack),
-	.i_ibus_rdt  (litedramcore_ibus_dat_r),
-	.i_rst       ((sys_rst | litedramcore_reset)),
-	.i_timer_irq (1'd0),
+	.clk                    (sys_clk),
+	.dBusWishbone_ACK       (litedramcore_dbus_ack),
+	.dBusWishbone_DAT_MISO  (litedramcore_dbus_dat_r),
+	.dBusWishbone_ERR       (litedramcore_dbus_err),
+	.externalInterruptArray (litedramcore_interrupt),
+	.externalResetVector    (litedramcore_vexriscv),
+	.iBusWishbone_ACK       (litedramcore_ibus_ack),
+	.iBusWishbone_DAT_MISO  (litedramcore_ibus_dat_r),
+	.iBusWishbone_ERR       (litedramcore_ibus_err),
+	.reset                  ((sys_rst | litedramcore_reset)),
+	.softwareInterrupt      (1'd0),
+	.timerInterrupt         (1'd0),
 
 	// Outputs.
-	.o_dbus_adr  (litedramcore_dbus_adr),
-	.o_dbus_cyc  (litedramcore_dbus_cyc),
-	.o_dbus_dat  (litedramcore_dbus_dat_w),
-	.o_dbus_sel  (litedramcore_dbus_sel),
-	.o_dbus_we   (litedramcore_dbus_we),
-	.o_ibus_adr  (litedramcore_ibus_adr),
-	.o_ibus_cyc  (litedramcore_ibus_cyc)
+	.dBusWishbone_ADR       (litedramcore_dbus_adr),
+	.dBusWishbone_BTE       (litedramcore_dbus_bte),
+	.dBusWishbone_CTI       (litedramcore_dbus_cti),
+	.dBusWishbone_CYC       (litedramcore_dbus_cyc),
+	.dBusWishbone_DAT_MOSI  (litedramcore_dbus_dat_w),
+	.dBusWishbone_SEL       (litedramcore_dbus_sel),
+	.dBusWishbone_STB       (litedramcore_dbus_stb),
+	.dBusWishbone_WE        (litedramcore_dbus_we),
+	.iBusWishbone_ADR       (litedramcore_ibus_adr),
+	.iBusWishbone_BTE       (litedramcore_ibus_bte),
+	.iBusWishbone_CTI       (litedramcore_ibus_cti),
+	.iBusWishbone_CYC       (litedramcore_ibus_cyc),
+	.iBusWishbone_DAT_MOSI  (litedramcore_ibus_dat_w),
+	.iBusWishbone_SEL       (litedramcore_ibus_sel),
+	.iBusWishbone_STB       (litedramcore_ibus_stb),
+	.iBusWishbone_WE        (litedramcore_ibus_we)
 );
 
 //------------------------------------------------------------------------------
@@ -26887,5 +26858,5 @@ FDPE #(
 endmodule
 
 // -----------------------------------------------------------------------------
-//  Auto-Generated by LiteX on 2025-06-25 01:40:29.
+//  Auto-Generated by LiteX on 2025-06-25 17:06:37.
 //------------------------------------------------------------------------------
